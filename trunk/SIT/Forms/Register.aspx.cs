@@ -52,10 +52,12 @@ namespace SIT.Forms
                         //Keine Exception bis hier? - Dann ist die Anmeldung erolgreich in der Datenbank gespeichert
                         //SELECT um die ID des Benutzers zu laden
                         SqlAddNewUser.SelectParameters["name"].DefaultValue = UserTextbox.Text;
-                        DataSet record = (DataSet)SqlAddNewUser.Select(DataSourceSelectArguments.Empty);
+
+                        //TODO: Weiterleitung
+                        //DataView record = (DataSet)SqlAddNewUser.Select(DataSourceSelectArguments.Empty);
 
                     }
-                    catch (System.InvalidOperationException){ 
+                    catch (System.Data.SqlClient.SqlException){ 
                         //Wird ausgelöst, wenn Benutzername vergeben
                         ErrorLabel.Text = "Benutzername ist bereits vorhanden, bitte wählen Sie einen anderen Benutzernamen.";
                         ErrorLabel.Visible = true;
