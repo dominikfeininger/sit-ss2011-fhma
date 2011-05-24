@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<logicalClassDesignerDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11.375, 8.5" name="SIT">
+  <logicalClassDesignerModelMoniker Id="ac750fba-26b6-42e5-bc46-d1ca01076672" />
+  <nestedChildShapes>
+    <classShape Id="e2904838-6b70-491f-91bf-356dd06d3c22" absoluteBounds="9.625, 0.5, 1.5, 0.92234373509883882" hideQualifiedName="false" increaseHeight="0" customColor="181, 193, 223">
+      <classMoniker Id="7192c51d-b768-4523-b6df-729f5a8a0b78" LastKnownName="Schluesselkasten" />
+      <nestedChildShapes>
+        <AttributeElementListCompartment Id="28aa1929-c9fe-4cd0-aab2-a0e88265833a" absoluteBounds="9.64, 0.89, 1.4700000000000002, 0.22117186754941942" name="AttributesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <OperationElementListCompartment Id="611e8a6e-a907-4e26-ad57-203102cefa22" absoluteBounds="9.64, 1.1211718675494193, 1.4700000000000002, 0.2011718675494194" name="OperationsCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+  </nestedChildShapes>
+</logicalClassDesignerDiagram>

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<logicalClassDesignerModel xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm4="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm5="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/ModelStore" dslVersion="1.0.0.0" Id="ac750fba-26b6-42e5-bc46-d1ca01076672" name="SIT" linkedPackageId="28290dd2-0ee4-4dbb-8de2-03896d5f12b7" xmlns="http://schemas.microsoft.com/dsltools/LogicalClassDesigner">
+  <profileInstances>
+    <packageHasProfileInstances Id="1c869ffe-8565-43e9-9aa6-1d539f9358d8">
+      <profileInstance Id="59eac51b-8f84-487d-a854-bb81b7a54562" name="StandardProfileL2">
+        <elementDefinition Id="e34d544e-0fea-4ed6-ac5e-1b74119ac791" />
+      </profileInstance>
+      <elementDefinition Id="0caec977-1f8c-4ba3-a7db-8cc9ad9cc73b" />
+    </packageHasProfileInstances>
+    <packageHasProfileInstances Id="6af10fdf-c65e-43da-8f4d-5e02cea450ad">
+      <profileInstance Id="8575267c-2521-4e7f-9778-00522a9d9ef9" name="StandardProfileL3">
+        <elementDefinition Id="532ea607-fb19-44b8-8502-3351b05452be" />
+      </profileInstance>
+      <elementDefinition Id="29349502-908c-4fda-9054-c48619c59ed0" />
+    </packageHasProfileInstances>
+  </profileInstances>
+  <packagedElements>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="7192c51d-b768-4523-b6df-729f5a8a0b78" name="Schluesselkasten" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="96130749-8a9a-4393-94ea-1570a748d9b3" />
+      </class>
+    </logicalClassDesignerModelHasTypes>
+  </packagedElements>
+  <package Id="28290dd2-0ee4-4dbb-8de2-03896d5f12b7" name="SIT_Klassendiagramm">
+    <elementDefinition Id="e72fc953-689f-401f-bf77-5d2071912e7f" />
+  </package>
+</logicalClassDesignerModel>
