@@ -10,6 +10,7 @@ namespace SIT
 
         /// <summary>
         /// Hasht ein Passwort mit dem Secure Hash Algorithm (Länge 256)
+        /// GETESTET und funktioniert
         /// </summary>
         /// <param name="pass">Passwort das zu Hashen ist</param>
         /// <returns>gehashtes Passwort</returns>
@@ -22,6 +23,7 @@ namespace SIT
 
         /// <summary>
         /// Verrgleicht ein Passwort, ob es mit einem Hash übereinstimmt
+        /// GETESTET und funktioniert
         /// </summary>
         /// <param name="pass">Passwort</param>
         /// <param name="hash">Passwort als Hash</param>s

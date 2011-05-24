@@ -32,14 +32,12 @@
             <SelectParameters>
                 <asp:ControlParameter ControlID="UserTextbox" Name="Name" PropertyName="Text" 
                     Type="String" />
-                <asp:ControlParameter ControlID="UserTextbox" Name="Password" 
-                    PropertyName="Text" Type="String" />
+                <asp:Parameter Name="Password" Type="String" />
             </SelectParameters>
         </asp:SqlDataSource>
         <asp:Label ID="ErrorLabel" runat="server" style="color: #FF0000" Text="Error" 
             Visible="False"></asp:Label>
     </div>
-    <asp:SqlDataSource ID="SqlDataSource1" runat="server"></asp:SqlDataSource>
     </form>
 </body>
 </html>

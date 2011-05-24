@@ -24,12 +24,16 @@ namespace SIT
                 //Benutzereingabe laden
                 String user = UserTextbox.Text;
                 String password = PasswordTextbox.Text;
+                //Setze das Passwort für die Abfrage
+                DataSourceCheckPW.SelectParameters["Password"].DefaultValue = SecurityProvider.hashPassword(PasswordTextbox.Text);
                 //Benutze das angelegte Control zum Select
                 DataView dv = (DataView)DataSourceCheckPW.Select(DataSourceSelectArguments.Empty);
                 if (dv.Count == 1)
                 {
-                    CurrentUser.Name = user;
-                    CurrentUser.IsAuthenticated = true;
+                    //ID des Benutzers in der Session hinterlegen
+                    Session.Add("ID", dv[0]["ID"]);
+                    ErrorLabel.Text = "ID in der Session: " + Session["ID"];
+                    ErrorLabel.Visible = true;
                 }
                 else {
                     //Fehlermeldung anzeigen
