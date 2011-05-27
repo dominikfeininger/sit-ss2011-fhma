@@ -70,6 +70,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\Crypt.cs" />
     <Compile Include="Data\KeyChain.cs" />
     <Compile Include="Data\SecurityProvider.cs" />
     <Compile Include="Forms\Register.aspx.cs">
