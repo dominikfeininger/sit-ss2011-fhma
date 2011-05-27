@@ -17,8 +17,6 @@ namespace SIT.Forms
 
         protected void registerButton_Click(object sender, EventArgs e)
         {
-            //TODO: Löschen
-            SecurityProvider.createKeys("testdsadasdsa");
             ErrorLabel.Visible = false;
             //Validierung ob alle Felder ausgefüllt sind
             if (!(UserTextbox.Text.Equals("") ||
@@ -64,6 +62,9 @@ namespace SIT.Forms
                             SqlAddNewMasterkey.InsertParameters["UserID"].DefaultValue = ID;
                             SqlAddNewMasterkey.InsertParameters["Masterkey"].DefaultValue = keys.masterKey;
                             SqlAddNewMasterkey.Insert();
+
+                            //Zum login weiterleiten
+                            HttpContext.Current.Response.Redirect("~/Forms/Login.aspx");
                         }
                         catch (System.Data.SqlClient.SqlException)
                         {

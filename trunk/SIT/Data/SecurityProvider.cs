@@ -230,13 +230,13 @@ namespace SIT
         /// <param name="inName"></param>
         /// <param name="outName"></param>
         /// <param name="tDesKey"></param>
-        public static void encryptFile(String inName, String outName, byte[] tDesKey)
+        public static void encryptFile(Stream inputstream, String outName, String cspBlob)
         {
-
-            byte[] tDesIV = ASCIIEncoding.ASCII.GetBytes(byteArrayToString(tDesKey));
+            //Initialisierungsvektor laden
+            byte[] tDesIV = iv;
 
             //Filestreams für Input- und Output-File erzeugen.
-            FileStream fin = new FileStream(inName, FileMode.Open, FileAccess.Read);
+            Stream fin = inputstream;
             FileStream fout = new FileStream(outName, FileMode.OpenOrCreate, FileAccess.Write);
             fout.SetLength(0);
 

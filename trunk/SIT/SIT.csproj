@@ -52,6 +52,7 @@
     <Reference Include="System.Web.ApplicationServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Forms\Intern.aspx" />
     <Content Include="Forms\Login.aspx" />
     <Content Include="Forms\Register.aspx" />
     <Content Include="Styles\Site.css" />
@@ -73,6 +74,13 @@
     <Compile Include="Data\Crypt.cs" />
     <Compile Include="Data\KeyChain.cs" />
     <Compile Include="Data\SecurityProvider.cs" />
+    <Compile Include="Forms\Intern.aspx.cs">
+      <DependentUpon>Intern.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Forms\Intern.aspx.designer.cs">
+      <DependentUpon>Intern.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Register.aspx.cs">
       <DependentUpon>Register.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
