@@ -17,6 +17,8 @@ namespace SIT.Forms
 
         protected void registerButton_Click(object sender, EventArgs e)
         {
+            //TODO: Löschen
+            SecurityProvider.createKeys("testdsadasdsa");
             ErrorLabel.Visible = false;
             //Validierung ob alle Felder ausgefüllt sind
             if (!(UserTextbox.Text.Equals("") ||
