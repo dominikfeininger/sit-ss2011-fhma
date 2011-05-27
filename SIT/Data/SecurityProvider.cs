@@ -4,6 +4,7 @@ using System.Text;
 using System.IO;
 using System.Globalization;
 using System.Diagnostics;
+using System.Security;
 
 namespace SIT
 {
@@ -68,20 +69,15 @@ namespace SIT
         /// <returns></returns>
         public static KeyChain createKeys(String privateKeyPassword)
         {
-            String enc = encryptPrivateKey("text","passwort");
-            String dec = decryptPrivateKey(enc, "passwort");
-
-            KeyChain keys = new KeyChain();
+            KeyChain keychain = new KeyChain();
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
-            //Private Key laden
-            byte[] privateKey = rsa.ExportCspBlob(true);
-            //TODO Private Key mit Passwort verschlüsseln
-
-            //Public Key ladens
-            String publicKey = byteArrayToString(rsa.ExportCspBlob(false));
-            //TODO Masterkey generieren und mit publicKey verschlüsseln
-
-            return keys;
+            //Private Key laden und mit Passwort verschlüsseln
+            keychain.privateKey = encryptKeySym(byteArrayToString(rsa.ExportCspBlob(true)), privateKeyPassword);
+            //Public Key laden
+            keychain.publicKey = byteArrayToString(rsa.ExportCspBlob(false));
+            //Masterkey generieren und mit publicKey verschlüsseln
+            keychain.masterKey =  encryptKeyAsym(generateMasterKey(), keychain.publicKey);
+            return keychain;
         
         }
 
@@ -94,7 +90,7 @@ namespace SIT
         /// <param name="key">Privater Schlüssel</param>
         /// <param name="password">Passwort zum privaten Schlüssel</param>
         /// <returns>Verschlüsselten Key</returns>
-        private static String encryptPrivateKey(String key, String password) {
+        private static String encryptKeySym(String key, String password) {
             {
                 try
                 {
@@ -141,7 +137,7 @@ namespace SIT
         /// <param name="encryptedKey">Verschlüsselter Key</param>
         /// <param name="password">Passwort zum entpacken</param>
         /// <returns>Entschlüsselter Key</returns>
-        private static String decryptPrivateKey(String encryptedKey, String password){
+        private static String decryptKeySym(String encryptedKey, String password){
             try
             {
                 byte[] keyAsByte = stringToByteArray(encryptedKey);
@@ -191,9 +187,117 @@ namespace SIT
         /// <returns></returns>
         private static String generateMasterKey() {
             // Erzeuge eine Instanz eines TripleDES. Key und Vektor werden automatisch generiert.
-            TripleDESCryptoServiceProvider tdesCrypto = (TripleDESCryptoServiceProvider)TripleDESCryptoServiceProvider.Create();
-            // Gebe den Key als String zurück
-            return ASCIIEncoding.ASCII.GetString(tdesCrypto.Key);
+            TripleDESCryptoServiceProvider tdes = (TripleDESCryptoServiceProvider)TripleDESCryptoServiceProvider.Create();
+            return byteArrayToString(tdes.Key);
+        }
+
+        /// <summary>
+        /// Verschlüsselt einen Key assymetrisch
+        /// </summary>
+        /// <param name="key">Schlüssel, der verschlüsselt werden soll</param>
+        /// <param name="rsaparamsBLOB">CSP Blob der Parameter (nur public key nötig)</param>
+        /// <returns>Verschlüsselter Schlüssel</returns>
+        public static String encryptKeyAsym(String key, String rsaparamsBLOB) {
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+            rsa.ImportCspBlob(stringToByteArray(rsaparamsBLOB));
+            return byteArrayToString(rsa.Encrypt(stringToByteArray(key), true));  
+        }
+
+        /// <summary>
+        /// Verschlüsselt einen Key assymetrisch
+        /// </summary>
+        /// <param name="key">Schlüssel, der verschlüsselt werden soll</param>
+        /// <param name="rsaparamsBLOB">CSP Blob der Parameter (nur public key nötig)</param>
+        /// <returns>Verschlüsselter Schlüssel</returns>
+        public static String decryptKeyAsym(String key, String rsaparamsBLOB)
+        {
+            try
+            {
+                RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+                rsa.ImportCspBlob(stringToByteArray(rsaparamsBLOB));
+                return byteArrayToString(rsa.Decrypt(stringToByteArray(key), true));
+            }
+            catch (Exception e){
+                Debug.Write("Fehler beim Entschlüsseln: {0}", e.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Verschlüsselt eine Datei
+        /// ! NICHT GETESTET !
+        /// </summary>
+        /// <param name="inName"></param>
+        /// <param name="outName"></param>
+        /// <param name="tDesKey"></param>
+        public static void encryptFile(String inName, String outName, byte[] tDesKey)
+        {
+
+            byte[] tDesIV = ASCIIEncoding.ASCII.GetBytes(byteArrayToString(tDesKey));
+
+            //Filestreams für Input- und Output-File erzeugen.
+            FileStream fin = new FileStream(inName, FileMode.Open, FileAccess.Read);
+            FileStream fout = new FileStream(outName, FileMode.OpenOrCreate, FileAccess.Write);
+            fout.SetLength(0);
+
+            //Helfervariablen für Lesen und Schreiben.
+            byte[] bin = new byte[10000];   //Puffer fürs Verschlüsseln.
+            long rdlen = 0;                 //Anzahl der geschriebenen Bytes.
+            long totlen = fin.Length;       //Länge der Datei.
+            int len;                        //Anzahl der Bytes die auf einmal geschrieben werden sollen.
+
+            TripleDES tDes = new TripleDESCryptoServiceProvider();
+            CryptoStream encStream = new CryptoStream(fout, tDes.CreateEncryptor(tDesKey, tDesIV), CryptoStreamMode.Write);
+
+            //Aus dem Input-File lesen, verschlüsseln und in Output-File schreiben
+            while (rdlen < totlen)
+            {
+                len = fin.Read(bin, 0, 10000);
+                encStream.Write(bin, 0, len);
+                rdlen = rdlen + len;
+            }
+
+            encStream.Close();
+            fout.Close();
+            fin.Close();
+        }
+
+        /// <summary>
+        /// Entschlüsselt eine Datei 
+        /// ! NICHT GETESTET !
+        /// </summary>
+        /// <param name="inName"></param>
+        /// <param name="outName"></param>
+        /// <param name="tDesKey"></param>
+        public static void decryptFile(String inName, String outName, byte[] tDesKey)
+        {
+            byte[] tDesIV = ASCIIEncoding.ASCII.GetBytes(byteArrayToString(tDesKey));
+
+            //Filestreams für Input- und Output-File erzeugen.
+            FileStream fin = new FileStream(inName, FileMode.Open, FileAccess.Read);
+            FileStream fout = new FileStream(outName, FileMode.OpenOrCreate, FileAccess.Write);
+            fout.SetLength(0);
+
+            //Helfervariablen für Lesen und Schreiben.
+            byte[] bin = new byte[10000];   //Puffer fürs Entschlüsseln.
+            long rdlen = 0;                 //Anzahl der geschriebenen Bytes
+            long totlen = fin.Length;       //Länge der Datei.
+            int len;                        //Anzahl der Bytes die auf einmal geschrieben werden sollen.
+
+            TripleDES tDes = new TripleDESCryptoServiceProvider();
+            CryptoStream decStream = new CryptoStream(fout, tDes.CreateDecryptor(tDesKey, tDesIV), CryptoStreamMode.Write);
+
+            //Aus dem Input-File lesen, entschlüsseln und in Output-File schreiben
+            while (rdlen < totlen)
+            {
+                len = fin.Read(bin, 0, 10000);
+                decStream.Write(bin, 0, len);
+                rdlen = rdlen + len;
+            }
+
+            decStream.Close();
+            fout.Close();
+            fin.Close();
         }
     }
 

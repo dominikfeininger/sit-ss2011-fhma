@@ -44,19 +44,34 @@ namespace SIT.Forms
                 {
                     try
                     {
+                        //Schlüsselbund generieren
+                        KeyChain keys = SecurityProvider.createKeys(PrivateKeyPassword1.Text);
                         SqlAddNewUser.InsertParameters["name"].DefaultValue = UserTextbox.Text;
                         SqlAddNewUser.InsertParameters["password"].DefaultValue = SecurityProvider.hashPassword(PasswordTextbox1.Text);
-                        SqlAddNewUser.InsertParameters["PublicKey"].DefaultValue = "12345";
-                        SqlAddNewUser.InsertParameters["PrivateKey"].DefaultValue = "123456";
+                        SqlAddNewUser.InsertParameters["PublicKey"].DefaultValue = keys.publicKey;
+                        SqlAddNewUser.InsertParameters["PrivateKey"].DefaultValue = keys.privateKey;
                         SqlAddNewUser.InsertParameters["PrivateKeyPassword"].DefaultValue = SecurityProvider.hashPassword(PrivateKeyPassword1.Text);
                         SqlAddNewUser.Insert();
 
                         //Keine Exception bis hier? - Dann ist die Anmeldung erolgreich in der Datenbank gespeichert
                         //SELECT um die ID des Benutzers zu laden
                         SqlAddNewUser.SelectParameters["name"].DefaultValue = UserTextbox.Text;
+                        DataView record = (DataView)SqlAddNewUser.Select(DataSourceSelectArguments.Empty);
+                        String ID = record[0]["ID"].ToString();
 
-                        //TODO: Weiterleitung
-                        //DataView record = (DataSet)SqlAddNewUser.Select(DataSourceSelectArguments.Empty);
+                        try { 
+                            //Insert anpassen
+                            SqlAddNewMasterkey.InsertParameters["UserID"].DefaultValue = ID;
+                            SqlAddNewMasterkey.InsertParameters["Masterkey"].DefaultValue = keys.masterKey;
+                            SqlAddNewMasterkey.Insert();
+                        }
+                        catch (System.Data.SqlClient.SqlException)
+                        {
+                            //Wird ausgelöst, wenn ein Einfügen nicht möglich war
+                            ErrorLabel.Text = "Es ist ein Fehler bei der Auswahl des Benutzers aufgetreten.";
+                            ErrorLabel.Visible = true;
+
+                        }
 
                     }
                     catch (System.Data.SqlClient.SqlException){ 

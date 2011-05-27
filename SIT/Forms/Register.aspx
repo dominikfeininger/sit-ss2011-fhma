@@ -55,6 +55,16 @@ VALUES (@name,@password,@PublicKey,@PrivateKey,@PrivateKeyPassword)"
                 style="color: #FF0000; background-color: #FFFFFF" Text="Error" Visible="False"></asp:Label>
         </div>
      </div>
+        <asp:SqlDataSource ID="SqlAddNewMasterkey" runat="server" 
+            ConnectionString="<%$ ConnectionStrings:SIT_Database %>" 
+            InsertCommand="INSERT INTO MasterKeys(UserID, MasterKey, IsCopy) VALUES (@UserID,@Masterkey,@IsCopy)" 
+            SelectCommand="SELECT [ID], [MasterKey], [UserID], [IsCopy] FROM [MasterKeys]">
+            <InsertParameters>
+                <asp:Parameter Name="UserID" />
+                <asp:Parameter DefaultValue="" Name="Masterkey" />
+                <asp:Parameter DefaultValue="0" Name="IsCopy" />
+            </InsertParameters>
+        </asp:SqlDataSource>
     </form>
 </body>
 </html>
