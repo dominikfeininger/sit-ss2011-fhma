@@ -32,8 +32,11 @@ namespace SIT
                 {
                     //ID des Benutzers in der Session hinterlegen
                     Session.Add("ID", dv[0]["ID"]);
-                    ErrorLabel.Text = "ID in der Session: " + Session["ID"];
-                    ErrorLabel.Visible = true;
+
+                    //Zum Internen Bereich weiterleiten
+                    HttpContext.Current.Response.Redirect("~/Forms/Intern.aspx");
+
+
                 }
                 else {
                     //Fehlermeldung anzeigen
