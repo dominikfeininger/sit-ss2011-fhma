@@ -76,9 +76,26 @@ namespace SIT
             //Public Key laden
             keychain.publicKey = byteArrayToString(rsa.ExportCspBlob(false));
             //Masterkey generieren und mit publicKey verschlüsseln
-            keychain.masterKey =  encryptKeyAsym(generateMasterKey(), keychain.publicKey);
+            keychain.masterKey = encryptKeyAsym(generateMasterKey(), keychain.publicKey);
             return keychain;
-        
+
+        }
+
+        /// <summary>
+        /// Entschlüsselt einen kompletten KeyChain
+        /// TODO
+        /// </summary>
+        /// <param name="fromDatabase"></param>
+        /// <returns></returns>
+        public static KeyChain decryptKeyChain(KeyChain fromDatabase, String password) {
+            KeyChain ret = new KeyChain();
+            //Public Key ist nicht verschlüsselt
+            ret.publicKey = fromDatabase.publicKey;
+            //Private Key ist mit Passwort verschlüsselt
+            ret.privateKey = decryptKeySym(fromDatabase.privateKey, password);
+            //Masterkey ist mit Public und Privatekey verschlüsselt
+            ret.masterKey = decryptKeyAsym(fromDatabase.masterKey, ret.privateKey);
+            return ret;
         }
 
         //Initialisierungsvektor für encryptPrivateKey
@@ -230,14 +247,17 @@ namespace SIT
         /// <param name="inName"></param>
         /// <param name="outName"></param>
         /// <param name="tDesKey"></param>
-        public static void encryptFile(Stream inputstream, String outName, String cspBlob)
+        public static void encryptFile(Stream inputstream, String filename, KeyChain decryptedKeyChain)
         {
             //Initialisierungsvektor laden
             byte[] tDesIV = iv;
 
+            //Filepfad angeben
+            String filepath = "c:\\temp\\";
+
             //Filestreams für Input- und Output-File erzeugen.
             Stream fin = inputstream;
-            FileStream fout = new FileStream(outName, FileMode.OpenOrCreate, FileAccess.Write);
+            FileStream fout = new FileStream(filepath+filename, FileMode.OpenOrCreate, FileAccess.Write);
             fout.SetLength(0);
 
             //Helfervariablen für Lesen und Schreiben.
@@ -247,7 +267,8 @@ namespace SIT
             int len;                        //Anzahl der Bytes die auf einmal geschrieben werden sollen.
 
             TripleDES tDes = new TripleDESCryptoServiceProvider();
-            CryptoStream encStream = new CryptoStream(fout, tDes.CreateEncryptor(tDesKey, tDesIV), CryptoStreamMode.Write);
+            byte[] masterkey = stringToByteArray(decryptedKeyChain.masterKey);
+            CryptoStream encStream = new CryptoStream(fout, tDes.CreateEncryptor(masterkey, tDesIV), CryptoStreamMode.Write);
 
             //Aus dem Input-File lesen, verschlüsseln und in Output-File schreiben
             while (rdlen < totlen)
@@ -260,6 +281,8 @@ namespace SIT
             encStream.Close();
             fout.Close();
             fin.Close();
+
+            decryptFile("dasd", "dasdas", decryptedKeyChain);
         }
 
         /// <summary>
@@ -269,9 +292,12 @@ namespace SIT
         /// <param name="inName"></param>
         /// <param name="outName"></param>
         /// <param name="tDesKey"></param>
-        public static void decryptFile(String inName, String outName, byte[] tDesKey)
+        public static void decryptFile(String inName, String outName, KeyChain decryptedKeyChain)
         {
-            byte[] tDesIV = ASCIIEncoding.ASCII.GetBytes(byteArrayToString(tDesKey));
+            byte[] tDesIV = iv;
+            //Filepfad angeben
+            inName = "c:\\temp\\RHDSetup.log";
+            outName = "c:\\temp\\out\\RHDSetup.log";
 
             //Filestreams für Input- und Output-File erzeugen.
             FileStream fin = new FileStream(inName, FileMode.Open, FileAccess.Read);
@@ -285,7 +311,8 @@ namespace SIT
             int len;                        //Anzahl der Bytes die auf einmal geschrieben werden sollen.
 
             TripleDES tDes = new TripleDESCryptoServiceProvider();
-            CryptoStream decStream = new CryptoStream(fout, tDes.CreateDecryptor(tDesKey, tDesIV), CryptoStreamMode.Write);
+            byte[] masterkey = stringToByteArray(decryptedKeyChain.masterKey);
+            CryptoStream decStream = new CryptoStream(fout, tDes.CreateDecryptor(masterkey, tDesIV), CryptoStreamMode.Write);
 
             //Aus dem Input-File lesen, entschlüsseln und in Output-File schreiben
             while (rdlen < totlen)
