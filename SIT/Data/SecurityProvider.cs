@@ -68,8 +68,8 @@ namespace SIT
         /// <returns></returns>
         public static KeyChain createKeys(String privateKeyPassword)
         {
-            String enc = encryptPrivateKey("test","test");
-            String dec = decryptPrivateKey(enc, "test");
+            String enc = encryptPrivateKey("text","passwort");
+            String dec = decryptPrivateKey(enc, "passwort");
 
             KeyChain keys = new KeyChain();
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
@@ -105,13 +105,13 @@ namespace SIT
                     MD5 md5Hash = new MD5CryptoServiceProvider();
                     byte[] hash = md5Hash.ComputeHash(stringToByteArray(password));
 
+                    // Eingabestring in ein Byte-Array konvertieren
+                    byte[] toEncrypt = stringToByteArray(key);
+
                     // CryptoStream Objekt erzeugen und den Initialisierungs-Vektor
                     // sowie den Schlüssel übergeben.
                     CryptoStream cryptoStream = new CryptoStream(
                     memoryStream, new TripleDESCryptoServiceProvider().CreateEncryptor(hash, iv), CryptoStreamMode.Write);
-
-                    // Eingabestring in ein Byte-Array konvertieren
-                    byte[] toEncrypt = stringToByteArray(key);
 
                     // Byte-Array in den Stream schreiben und flushen.
                     cryptoStream.Write(toEncrypt, 0, toEncrypt.Length);
@@ -167,8 +167,16 @@ namespace SIT
                 // und im temporären Puffer ablegen.
                 cryptoStream.Read(fromEncrypt, 0, fromEncrypt.Length);
 
+                // Bytearray untersuchen
+                int i = fromEncrypt.Length - 1;
+                while (fromEncrypt[i] == 0)
+                    --i;
+                // fromEncrypt[i] ist das letzte Byte (nicht 0)
+                byte[] ret = new byte[i + 1];
+                Array.Copy(fromEncrypt, ret, i + 1);
+
                 // Den Puffer in einen String konvertieren und zurückgeben.
-                return byteArrayToString(fromEncrypt);
+                return byteArrayToString(ret);
             }
             catch (CryptographicException e)
             {
