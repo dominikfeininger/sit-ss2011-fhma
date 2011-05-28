@@ -6,5 +6,6 @@ namespace SIT
         public String publicKey;
         public String privateKey;
         public String masterKey;
+        public String masterKeyID;
     }
 }
