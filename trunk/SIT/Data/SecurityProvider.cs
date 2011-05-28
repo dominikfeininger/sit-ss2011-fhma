@@ -254,7 +254,7 @@ namespace SIT
         /// <param name="inputstream">Uploadstream</param>
         /// <param name="filename">Dateiname</param>
         /// <param name="decryptedKeyChain">Entschlüsselter Schlüsselbund</param>
-        public static void encryptFile(Stream inputstream, String filename, KeyChain decryptedKeyChain)
+        public static String encryptFile(Stream inputstream, String filename, KeyChain decryptedKeyChain)
         {
             //Initialisierungsvektor laden
             byte[] tDesIV = iv;
@@ -303,6 +303,9 @@ namespace SIT
             encStream.Close();
             fout.Close();
             fin.Close();
+
+            //Pfad der verschlüsselten Datei zurückgeben
+            return filepath + filename;
         }
 
         /// <summary>
