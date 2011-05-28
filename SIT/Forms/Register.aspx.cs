@@ -61,6 +61,7 @@ namespace SIT.Forms
                             //Insert anpassen
                             SqlAddNewMasterkey.InsertParameters["UserID"].DefaultValue = ID;
                             SqlAddNewMasterkey.InsertParameters["Masterkey"].DefaultValue = keys.masterKey;
+                            SqlAddNewMasterkey.InsertParameters["OwnerID"].DefaultValue = ID;
                             SqlAddNewMasterkey.Insert();
 
                             //Zum login weiterleiten
