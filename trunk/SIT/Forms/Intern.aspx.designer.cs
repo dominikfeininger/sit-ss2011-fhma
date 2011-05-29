@@ -103,13 +103,13 @@ namespace SIT.Forms {
         protected global::System.Web.UI.WebControls.Panel KeyExchangePanel;
         
         /// <summary>
-        /// GridView1-Steuerelement
+        /// AllKeysView-Steuerelement
         /// </summary>
         /// <remarks>
         /// Automatisch generiertes Feld
         /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView GridView1;
+        protected global::System.Web.UI.WebControls.GridView AllKeysView;
         
         /// <summary>
         /// SelectAllKeys-Steuerelement
@@ -130,22 +130,22 @@ namespace SIT.Forms {
         protected global::System.Web.UI.WebControls.DropDownList UserSelect;
         
         /// <summary>
-        /// Label1-Steuerelement
+        /// Button1-Steuerelement
         /// </summary>
         /// <remarks>
         /// Automatisch generiertes Feld
         /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label1;
+        protected global::System.Web.UI.WebControls.Button Button1;
         
         /// <summary>
-        /// SelectAllUsers-Steuerelement
+        /// KeyExchange-Steuerelement
         /// </summary>
         /// <remarks>
         /// Automatisch generiertes Feld
         /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.SqlDataSource SelectAllUsers;
+        protected global::System.Web.UI.WebControls.SqlDataSource KeyExchange;
         
         /// <summary>
         /// checkPrivatePasswort-Steuerelement

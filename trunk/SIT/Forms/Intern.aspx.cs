@@ -188,7 +188,6 @@ namespace SIT.Forms
         {
             //Öffnen oder Schließen
             KeyExchangePanel.Visible = !(KeyExchangePanel.Visible);
-            Label1.Text = UserSelect.DataValueField;
         }
 
         /// <summary>
@@ -196,9 +195,10 @@ namespace SIT.Forms
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void UserSelect_SelectedIndexChanged(object sender, EventArgs e)
+        protected void Button1_Click(object sender, EventArgs e)
         {
-            Label1.Text = UserSelect.DataValueField;
+            String text = UserSelect.SelectedItem.ToString();
+            String value = UserSelect.SelectedItem.Value;
         }
     }
 }
