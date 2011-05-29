@@ -8,6 +8,9 @@ using System.Security;
 using System.Xml;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Web.UI;
 
 namespace SIT
 {
@@ -260,7 +263,7 @@ namespace SIT
             byte[] tDesIV = iv;
 
             //Filepfad angeben
-            String filepath = "c:\\temp\\";
+            String filepath = SIT_Ressources.EncryptedPath;
 
             //Filestreams für Input- und Output-File erzeugen.
             Stream fin = inputstream;
@@ -277,16 +280,16 @@ namespace SIT
             byte[] masterkey = stringToByteArray(decryptedKeyChain.masterKey);
             CryptoStream encStream = new CryptoStream(fout, tDes.CreateEncryptor(masterkey, tDesIV), CryptoStreamMode.Write);
 
-            //Header schreiben
+            //Header schreiben und Schlüssel mit Masterpasswort verschlüsseln
             byte[] header = stringToByteArray(
                 "[KeyID]"+
                 decryptedKeyChain.masterKeyID+
                 "[Public]" +
                 decryptedKeyChain.publicKey+
                 "[Private]" +
-                decryptedKeyChain.privateKey+
+                encryptKeySym(decryptedKeyChain.privateKey,masterpw)+
                 "[Master]" +
-                decryptedKeyChain.masterKey+
+                encryptKeyAsym(decryptedKeyChain.masterKey,decryptedKeyChain.publicKey)+
                 "[Data]"
                 );
             fout.Write(header, 0, header.Length);
@@ -315,24 +318,24 @@ namespace SIT
         /// <param name="inName"></param>
         /// <param name="outName"></param>
         /// <param name="tDesKey"></param>
-        public static void decryptFile(String inName, String outName, String masterkey)
+        public static String decryptFile(String filename, SqlDataSource MasterKeySelect, KeyChain decryptedKeyChain)
         {
 
             //Initialisierungsvektor laden
             byte[] tDesIV = iv;
-            
+
             //Filepfad angeben
-            inName = "c:\\temp\\RHDSetup.txt";
-            outName = "c:\\temp\\out\\RHDSetup.txt";
+            String filepath = SIT_Ressources.EncryptedPath;
 
             //Filestreams für Input- und Output-File erzeugen.
-            FileStream fin1 = new FileStream(inName, FileMode.Open, FileAccess.Read);
+            FileStream fin1 = new FileStream(filepath + filename, FileMode.Open, FileAccess.Read);
 
             //Header laden
             LinkedList<String> headerList = new LinkedList<String>();
             byte[] headerByte = new byte[1000];
             int length = 0;
-
+            
+            //Headerlänge ermitteln
             bool DataTagFound = false;
             while (!DataTagFound && length < fin1.Length) {
                 //Zeichen lesen
@@ -351,12 +354,13 @@ namespace SIT
             }
             //Ersten Filestream schließen
             fin1.Close();
+            fin1.Dispose();
 
             //Wenn der Header richtig gesetzt wurde
             if (DataTagFound)
             {
                 //Filestreams für Input- und Output-File erzeugen.
-                FileStream fin2 = new FileStream(inName, FileMode.Open, FileAccess.Read);
+                Stream fin2 = new FileStream(filepath + filename, FileMode.Open, FileAccess.Read);
 
                 //Header erstellen
                 StringBuilder headerBuilder = new StringBuilder();
@@ -376,44 +380,71 @@ namespace SIT
                 Match headerMatch = headerRegex.Match(header);
                 header = headerMatch.Value;
 
-                //Wenn Header null, dann wurde die Syntax der Datei geändert -> Abbruch
+                //Wenn kein Ergebnis vom Regulären Ausdruck, dann wurde die Syntax der Datei geändert -> Abbruch
                 if (header != null)
                 {
+                    //Erzeuge Schlüsselbund aus Headerstring
+                    KeyChain headerKeyChain = getKeyChainFromHeader(header);
 
-                    headerByte = stringToByteArray(header);
+                    //Prüfe ob der Benutzer ein Besitzer des Masterkeys ist
+                    MasterKeySelect.SelectParameters["OwnerID"].DefaultValue = headerKeyChain.masterKeyID;
+                    DataView record = (DataView)MasterKeySelect.Select(DataSourceSelectArguments.Empty);
 
-                    //Inputstream zurücksetzen
-                    fin2.Position = headerByte.Length;
-
-                    //Outputstream anlegen
-                    FileStream fout = new FileStream(outName, FileMode.OpenOrCreate, FileAccess.Write);
-                    fout.SetLength(0);
-
-                    //Helfervariablen für Lesen und Schreiben.
-                    byte[] bin = new byte[10000];   //Puffer fürs Entschlüsseln.
-                    long rdlen = 0;                 //Anzahl der geschriebenen Bytes
-                    long totlen = fin2.Length - headerByte.Length;       //Länge der Datei ohne Header
-                    int len;                        //Anzahl der Bytes die auf einmal geschrieben werden sollen.
-
-                    TripleDES tDes = new TripleDESCryptoServiceProvider();
-                    byte[] masterkeyBit = stringToByteArray(masterkey);
-                    //Masterkey überschreiben
-                    masterkey = "";
-                    CryptoStream decStream = new CryptoStream(fout, tDes.CreateDecryptor(masterkeyBit, tDesIV), CryptoStreamMode.Write);
-
-                    //TODO hier Header auslesen
-
-                    //Aus dem Input-File lesen, entschlüsseln und in Output-File schreiben
-                    while (rdlen < totlen)
+                    //Benutzer ist im Besitz des Schlüssels
+                    if (record.Count != 0)
                     {
-                        len = fin2.Read(bin, 0, 10000);
-                        decStream.Write(bin, 0, len);
-                        rdlen = rdlen + len;
-                    }
+                        //Masterkey aus Tabelle holen
+                        String masterkey = record[0]["MasterKey"].ToString();
+                        //Masterkey aus Tabelle mit eigenem PrivateKey entschlüsseln
+                        masterkey = decryptKeyAsym(masterkey, decryptedKeyChain.privateKey);
 
-                    decStream.Close();
-                    fout.Close();
-                    fin2.Close();
+                        //Header als Byte-Array speichern
+                        headerByte = stringToByteArray(header);
+
+                        //Header im Stream weglesen (wird nicht entschlüsselt)
+                        fin2.Position = headerByte.Length;
+
+                        //Outputstream anlegen
+                        FileStream fout = new FileStream(SIT_Ressources.DecryptedPath+filename, FileMode.OpenOrCreate, FileAccess.Write);
+                        fout.SetLength(0);
+
+                        //Helfervariablen für Lesen und Schreiben.
+                        byte[] bin = new byte[10000];   //Puffer fürs Entschlüsseln.
+                        long rdlen = 0;                 //Anzahl der geschriebenen Bytes
+                        long totlen = fin2.Length - headerByte.Length;       //Länge der Datei ohne Header
+                        int len;                        //Anzahl der Bytes die auf einmal geschrieben werden sollen.
+
+                        TripleDES tDes = new TripleDESCryptoServiceProvider();
+                        byte[] masterkeyBit = stringToByteArray(masterkey);
+                        //Masterkey überschreiben
+                        masterkey = "";
+                        CryptoStream decStream = new CryptoStream(fout, tDes.CreateDecryptor(masterkeyBit, tDesIV), CryptoStreamMode.Write);
+
+                        //TODO hier Header auslesen
+
+                        //Aus dem Input-File lesen, entschlüsseln und in Output-File schreiben
+                        while (rdlen < totlen)
+                        {
+                            len = fin2.Read(bin, 0, 10000);
+                            decStream.Write(bin, 0, len);
+                            rdlen = rdlen + len;
+                        }
+
+                        //Alles Schließen
+                        decStream.Close();
+                        fout.Close();
+                        fin2.Close();
+                        decStream.Dispose();
+                        fout.Dispose();
+                        fin2.Dispose();
+
+                        //Pfad der entschlüsselten Datei zurückgeben
+                        return SIT_Ressources.DecryptedPath + filename;
+
+                    }
+                    else {
+                        throw new Exception("Die Datei kann nicht entschlüsselt werden (Sie sind nicht im Besitz des passenden Schlüssels)");
+                    }
                 }
                 else {
                     throw new Exception("Die Datei kann nicht entschlüsselt werden, da sie nicht im gültigen Format vorliegt: Header fehlerhaft.");
@@ -425,6 +456,22 @@ namespace SIT
                 fin1.Close();
                 throw new Exception("Die Datei kann nicht entschlüsselt werden, da sie nicht im gültigen Format vorliegt: Data-Tag nicht gefunden.");
             }
+        }
+
+        /// <summary>
+        /// Liest aus einer Headerdatei einen Schlüsselbund aus
+        /// </summary>
+        /// <param name="header">Header, der von der Datei abgetrennt ist</param>
+        /// <returns>Schlüsselbund aus einem Dateiheader</returns>
+        private static KeyChain getKeyChainFromHeader(String header) {
+            Regex extractInfo = new Regex(@"\[KeyID](?<KeyID>(.|\n)*)\[Public](?<PublicKey>(.|\n)*)\[Private](?<PrivateKey>(.|\n)*)\[Master](?<MasterKey>(.|\n)*)\[Data]");
+            Match result = extractInfo.Match(header);
+            KeyChain keyChain = new KeyChain();
+            keyChain.masterKeyID = result.Groups["KeyID"].Value;
+            keyChain.publicKey = result.Groups["PublicKey"].Value;
+            keyChain.privateKey = result.Groups["PrivateKey"].Value;
+            keyChain.masterKey = result.Groups["MasterKey"].Value;
+            return keyChain;
         }
     }
 
