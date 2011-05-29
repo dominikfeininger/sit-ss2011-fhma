@@ -11,7 +11,7 @@
     <div>
     
     </div>
-    <asp:Panel ID="MainFrame" runat="server" Height="673px" Visible="False">
+    <asp:Panel ID="MainFrame" runat="server" Height="785px" Visible="False">
         <asp:Button ID="logout" runat="server" onclick="logout_Click" Text="Logout" />
         <br />
         <br />
@@ -39,7 +39,7 @@
         <asp:Panel ID="KeyExchangePanel" runat="server" Visible="False">
             <br />
             Sie besitzen die Schlüssel von folgenden Benutzern:<br />
-            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" 
+            <asp:GridView ID="AllKeysView" runat="server" AutoGenerateColumns="False" 
                 DataSourceID="SelectAllKeys">
                 <Columns>
                     <asp:BoundField DataField="Name" HeaderText="Name" SortExpression="Name" />
@@ -53,14 +53,17 @@ WHERE Users.ID = @user">
                 </SelectParameters>
             </asp:SqlDataSource>
             <br />
-            Schlüssel Weitergeben:<br />
-            <asp:DropDownList ID="UserSelect" runat="server" DataSourceID="SelectAllUsers" 
-                DataTextField="Name" DataValueField="ID" 
-                onselectedindexchanged="UserSelect_SelectedIndexChanged">
-            </asp:DropDownList>
-            <asp:Label ID="Label1" runat="server" Text="Label"></asp:Label>
+            Schlüssel weitergeben:<br />
             <br />
-            <asp:SqlDataSource ID="SelectAllUsers" runat="server" 
+            <asp:DropDownList ID="UserSelect" runat="server" DataSourceID="KeyExchange" 
+                DataTextField="Name" DataValueField="ID">
+            </asp:DropDownList>
+            <br />
+            <br />
+            <asp:Button ID="Button1" runat="server" onclick="Button1_Click" 
+                Text="Weitergeben" />
+            <br />
+            <asp:SqlDataSource ID="KeyExchange" runat="server" 
                 ConnectionString="<%$ ConnectionStrings:SIT_Database %>" 
                 SelectCommand="SELECT [name] as Name, [ID] FROM [Users]">
             </asp:SqlDataSource>
