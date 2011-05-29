@@ -324,11 +324,8 @@ namespace SIT
             //Initialisierungsvektor laden
             byte[] tDesIV = iv;
 
-            //Filepfad angeben
-            String filepath = SIT_Ressources.EncryptedPath;
-
             //Filestreams für Input- und Output-File erzeugen.
-            FileStream fin1 = new FileStream(filepath + filename, FileMode.Open, FileAccess.Read);
+            FileStream fin1 = new FileStream(SIT_Ressources.EncryptedPath + filename, FileMode.Open, FileAccess.Read);
 
             //Header laden
             LinkedList<String> headerList = new LinkedList<String>();
@@ -354,25 +351,28 @@ namespace SIT
             }
             //Ersten Filestream schließen
             fin1.Close();
-            fin1.Dispose();
 
             //Wenn der Header richtig gesetzt wurde
             if (DataTagFound)
             {
-                //Filestreams für Input- und Output-File erzeugen.
-                Stream fin2 = new FileStream(filepath + filename, FileMode.Open, FileAccess.Read);
-
                 //Header erstellen
                 StringBuilder headerBuilder = new StringBuilder();
                 //Zähler um nur gerade Indizes zum Stringbuilder hinzuzufügen
                 int i = 0;
-                foreach (String current in headerList) {
+                foreach (String current in headerList)
+                {
                     //Wenn gerader Index, füge zum Stringbuilder hinzu
-                    if (i % 2 == 0) {
+                    if (i % 2 == 0)
+                    {
                         headerBuilder.Append(current);
                     }
                     i++;
                 }
+
+                //Filestream für Input-File erzeugen frisch erzeugen
+                Stream fin2 = new FileStream(SIT_Ressources.EncryptedPath + filename, FileMode.Open, FileAccess.Read);
+
+                //Header als String laden
                 String header = headerBuilder.ToString();
                 //String auf nötiges reduzieren
                 Regex headerRegex = new Regex("\\[KeyID](.|\n)*\\[Public](.|\n)*\\[Private](.|\n)*\\[Master](.|\n)*\\[Data]");
@@ -420,8 +420,6 @@ namespace SIT
                         masterkey = "";
                         CryptoStream decStream = new CryptoStream(fout, tDes.CreateDecryptor(masterkeyBit, tDesIV), CryptoStreamMode.Write);
 
-                        //TODO hier Header auslesen
-
                         //Aus dem Input-File lesen, entschlüsseln und in Output-File schreiben
                         while (rdlen < totlen)
                         {
@@ -434,26 +432,25 @@ namespace SIT
                         decStream.Close();
                         fout.Close();
                         fin2.Close();
-                        decStream.Dispose();
-                        fout.Dispose();
-                        fin2.Dispose();
 
                         //Pfad der entschlüsselten Datei zurückgeben
                         return SIT_Ressources.DecryptedPath + filename;
 
                     }
                     else {
+                        //Offenen Stream schließen
+                        fin2.Close();
                         throw new Exception("Die Datei kann nicht entschlüsselt werden (Sie sind nicht im Besitz des passenden Schlüssels)");
                     }
                 }
                 else {
+                    //Offenen Stream schließen
+                    fin2.Close();
                     throw new Exception("Die Datei kann nicht entschlüsselt werden, da sie nicht im gültigen Format vorliegt: Header fehlerhaft.");
                 }
             }
             else {
                 //Header konnte nicht gelesen werden
-                //Verbindung beenden
-                fin1.Close();
                 throw new Exception("Die Datei kann nicht entschlüsselt werden, da sie nicht im gültigen Format vorliegt: Data-Tag nicht gefunden.");
             }
         }
