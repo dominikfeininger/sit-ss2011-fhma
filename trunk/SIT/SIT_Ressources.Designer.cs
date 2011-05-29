@@ -59,5 +59,23 @@ namespace SIT {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die c:\\temp\\decr\\ ähnelt.
+        /// </summary>
+        internal static string DecryptedPath {
+            get {
+                return ResourceManager.GetString("DecryptedPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die c:\\temp\\encr\\ ähnelt.
+        /// </summary>
+        internal static string EncryptedPath {
+            get {
+                return ResourceManager.GetString("EncryptedPath", resourceCulture);
+            }
+        }
     }
 }
