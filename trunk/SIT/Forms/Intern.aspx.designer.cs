@@ -67,6 +67,24 @@ namespace SIT.Forms {
         protected global::System.Web.UI.WebControls.Button decryptButton;
         
         /// <summary>
+        /// GetMasterKey-Steuerelement
+        /// </summary>
+        /// <remarks>
+        /// Automatisch generiertes Feld
+        /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.SqlDataSource GetMasterKey;
+        
+        /// <summary>
+        /// SelectPublicKey-Steuerelement
+        /// </summary>
+        /// <remarks>
+        /// Automatisch generiertes Feld
+        /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.SqlDataSource SelectPublicKey;
+        
+        /// <summary>
         /// Error-Steuerelement
         /// </summary>
         /// <remarks>
@@ -83,6 +101,15 @@ namespace SIT.Forms {
         /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox privateSecret;
+        
+        /// <summary>
+        /// checkPrivatePasswort-Steuerelement
+        /// </summary>
+        /// <remarks>
+        /// Automatisch generiertes Feld
+        /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.SqlDataSource checkPrivatePasswort;
         
         /// <summary>
         /// KeyExchangeButton-Steuerelement
@@ -130,6 +157,15 @@ namespace SIT.Forms {
         protected global::System.Web.UI.WebControls.DropDownList UserSelect;
         
         /// <summary>
+        /// SelectAllUsers-Steuerelement
+        /// </summary>
+        /// <remarks>
+        /// Automatisch generiertes Feld
+        /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.SqlDataSource SelectAllUsers;
+        
+        /// <summary>
         /// Button1-Steuerelement
         /// </summary>
         /// <remarks>
@@ -148,30 +184,12 @@ namespace SIT.Forms {
         protected global::System.Web.UI.WebControls.SqlDataSource KeyExchange;
         
         /// <summary>
-        /// checkPrivatePasswort-Steuerelement
+        /// SelectPublicKeyOfUser-Steuerelement
         /// </summary>
         /// <remarks>
         /// Automatisch generiertes Feld
         /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.SqlDataSource checkPrivatePasswort;
-        
-        /// <summary>
-        /// GetMasterKey-Steuerelement
-        /// </summary>
-        /// <remarks>
-        /// Automatisch generiertes Feld
-        /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.SqlDataSource GetMasterKey;
-        
-        /// <summary>
-        /// SelectPublicKey-Steuerelement
-        /// </summary>
-        /// <remarks>
-        /// Automatisch generiertes Feld
-        /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.SqlDataSource SelectPublicKey;
+        protected global::System.Web.UI.WebControls.SqlDataSource SelectPublicKeyOfUser;
     }
 }

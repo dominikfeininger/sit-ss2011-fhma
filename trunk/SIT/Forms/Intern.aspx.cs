@@ -16,9 +16,9 @@ namespace SIT.Forms
         {
             //TODO auskommentieren, damit man sich einloggen muss
             //if (Session["ID"] != null) {
-                MainFrame.Visible = true;
+            MainFrame.Visible = true;
             //}
-                Session.Add("ID", "6");
+            Session.Add("ID", "6");
         }
 
         /// <summary>
@@ -54,7 +54,8 @@ namespace SIT.Forms
                     //Benutze das angelegte Control zum Select
                     DataView dv1 = (DataView)checkPrivatePasswort.Select(DataSourceSelectArguments.Empty);
                     //Wenn es genau einen Record gibt wurde das richtige Passwort gewählt
-                    if (dv1.Count == 1) {
+                    if (dv1.Count == 1)
+                    {
                         try
                         {
                             //Schlüsselbund erzeugen und entschlüsseln
@@ -78,12 +79,14 @@ namespace SIT.Forms
                         Error.Visible = true;
                     }
                 }
-                else {
+                else
+                {
                     Error.Text = "Das Secret für den Privatekey muss gewählt werden";
                     Error.Visible = true;
                 }
             }
-            else {
+            else
+            {
                 Error.Text = "Eine Datei muss gewählt werden";
                 Error.Visible = true;
             }
@@ -164,7 +167,8 @@ namespace SIT.Forms
         /// Lädt einen Schlüsselbund zum aktullen Benutzer aus der Datenbank und entschlüsselt diesen
         /// </summary>
         /// <returns>Entschlüsselter Schlüsselbund des aktuellen Benutzers</returns>
-        private KeyChain getCurrentKeyChain() {
+        private KeyChain getCurrentKeyChain()
+        {
             //Select absetzen
             DataView dv = (DataView)SelectPublicKey.Select(DataSourceSelectArguments.Empty);
             //KeyChain erstellen
@@ -197,8 +201,47 @@ namespace SIT.Forms
         /// <param name="e"></param>
         protected void Button1_Click(object sender, EventArgs e)
         {
-            String text = UserSelect.SelectedItem.ToString();
-            String value = UserSelect.SelectedItem.Value;
+            //Schlüsselbund holen
+            Error.Visible = false;
+            //Wenn kein Passwort eingegeben
+            if (!privateSecret.Text.Equals(""))
+            {
+                //Wenn ein Benutzer geählt wurde
+                if (UserSelect.SelectedItem.Value != null) {
+                    //Passwort überprüfen
+                    checkPrivatePasswort.SelectParameters["PrivateKeyPassword"].DefaultValue = SecurityProvider.hashPassword(privateSecret.Text);
+                    //Benutze das angelegte Control zum Select
+                    DataView dv1 = (DataView)checkPrivatePasswort.Select(DataSourceSelectArguments.Empty);
+                    //Wenn es genau einen Record gibt wurde das richtige Passwort gewählt
+                    if (dv1.Count == 1)
+                    {
+                        try
+                        {
+                            //Schlüsselbund, BenutzerID und Datenverbindung übergeben
+                            SecurityProvider.relayMasterKey(getCurrentKeyChain(), UserSelect.SelectedItem.Value, KeyExchange, SelectPublicKeyOfUser);
+                            //Wenn keine Exception bis hier, dann wurde dem Benutzer der Schlüssel übergeben
+                            Error.Text = "Der Schlüssel wurde erfolgreich an den Benutzer '" + UserSelect.SelectedItem.ToString() +"' weitergegeben.";
+                            Error.Visible = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            Error.Text = "Fehler beim Übertragen des Schlüssels: " + ex.Message;
+                            Error.Visible = true;
+                        }
+                    }
+                
+                } 
+                else
+                {
+                    Error.Text = "Das Secret für den Privatekey wurde falsch eingegeben";
+                    Error.Visible = true;
+                }
+            }
+            else
+            {
+                Error.Text = "Das Secret für den Privatekey muss gewählt werden";
+                Error.Visible = true;
+            }
         }
     }
 }
