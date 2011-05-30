@@ -470,6 +470,46 @@ namespace SIT
             keyChain.masterKey = result.Groups["MasterKey"].Value;
             return keyChain;
         }
+
+        public static void relayMasterKey(KeyChain userKeyChain, String userIDToRelay, SqlDataSource KeyExchange, SqlDataSource SelectPublicKeyOfUser)
+        { 
+            //Testen ob bereits ein Schlüssel an den angegebenen Benutzer weitergegeben wurde
+            KeyExchange.SelectParameters["UserID"].DefaultValue = userIDToRelay;
+            DataView isAvalaibleRecord = (DataView)KeyExchange.Select(DataSourceSelectArguments.Empty);
+            
+            //Select gibt mindestens einen Record zurück => Schlüssel existiert bereits
+            if (isAvalaibleRecord.Count < 1)
+            {
+                //PublicKey des angegebenen Benutzers laden
+                SelectPublicKeyOfUser.SelectParameters["ID"].DefaultValue = userIDToRelay;
+                DataView publicKeyRecord = (DataView)SelectPublicKeyOfUser.Select(DataSourceSelectArguments.Empty);
+
+                //Wenn PublicKey geladen werden konnte
+                if (publicKeyRecord.Count == 1)
+                {
+                    //PublicKey laden
+                    String publicKey = publicKeyRecord[0]["PublicKey"].ToString();
+                    //Masterkey mit PublicKey des gewählten Benutzers verschlüsseln
+                    String masterKey = encryptKeyAsym(userKeyChain.masterKey, publicKey);
+                    //Masterkey dem Benutzer zugeordnet in der DB speichern
+                    KeyExchange.InsertParameters["UserID"].DefaultValue = userIDToRelay;
+                    KeyExchange.InsertParameters["MasterKey"].DefaultValue = masterKey;
+                    KeyExchange.Insert();
+
+                    //Defaultwerte des Inserts zurücksetzen
+                    KeyExchange.InsertParameters["UserID"].DefaultValue = null;
+                    KeyExchange.InsertParameters["MasterKey"].DefaultValue = null;
+                }
+                else {
+                    throw new Exception("Der Public-Key des gewählten Benutzers konnte nicht geladen werden.");
+                }
+
+            }
+            else { 
+                //Es ist zusätzlich ein Unique-Key in der Datenbank gesetzt um ein doppeltes Eintragen der Konstellation UserID - OwnerID zu verhindern
+                throw new Exception("Ihr Schlüssel wurde bereits an den gewählten Benutzer weitergegeben.");
+            }
+        }
     }
 
 }

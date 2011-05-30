@@ -1,15 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <publishData>
   <publishProfile publishUrl="C:\Web\Deploy" deleteExistingFiles="True" ftpAnonymousLogin="False" ftpPassiveMode="True" msdeploySite="" msdeploySiteID="" msdeployRemoteSitePhysicalPath="" msdeployAllowUntrustedCertificate="False" msdeploySkipExtraFilesOnServer="True" msdeployMarkAsApp="True" profileName="Profil1" publishMethod="FileSystem" replaceMatchingFiles="False" userName="" savePWD="False" userPWD="" SelectedForPublish="True">
-    <file relUrl="Web.config" publishTime="05/21/2011 15:19:25" />
-    <file relUrl="bin/SIT.pdb" publishTime="05/21/2011 15:19:25" />
-    <file relUrl="Styles/Site.css" publishTime="05/17/2011 08:23:23" />
-    <file relUrl="Forms/Login.aspx" publishTime="05/21/2011 11:27:56" />
-    <file relUrl="Scripts/jquery-1.4.1.js" publishTime="05/17/2011 08:23:23" />
-    <file relUrl="Forms/Register.aspx" publishTime="05/21/2011 14:31:40" />
-    <file relUrl="bin/SIT.dll" publishTime="05/21/2011 15:19:25" />
-    <file relUrl="Global.asax" publishTime="05/17/2011 08:23:23" />
-    <file relUrl="Scripts/jquery-1.4.1-vsdoc.js" publishTime="05/17/2011 08:23:23" />
+    <file relUrl="bin/SIT.dll" publishTime="05/30/2011 10:15:10" />
     <file relUrl="Scripts/jquery-1.4.1.min.js" publishTime="05/17/2011 08:23:23" />
+    <file relUrl="Scripts/jquery-1.4.1-vsdoc.js" publishTime="05/17/2011 08:23:23" />
+    <file relUrl="bin/SIT.pdb" publishTime="05/30/2011 10:15:10" />
+    <file relUrl="Forms/Register.aspx" publishTime="05/27/2011 21:41:32" />
+    <file relUrl="Web.config" publishTime="05/21/2011 15:19:25" />
+    <file relUrl="Forms/Intern.aspx" publishTime="05/30/2011 10:11:42" />
+    <file relUrl="Styles/Site.css" publishTime="05/17/2011 08:23:23" />
+    <file relUrl="Forms/Login.aspx" publishTime="05/24/2011 15:56:58" />
+    <file relUrl="Global.asax" publishTime="05/17/2011 08:23:23" />
+    <file relUrl="Scripts/jquery-1.4.1.js" publishTime="05/17/2011 08:23:23" />
   </publishProfile>
 </publishData>
