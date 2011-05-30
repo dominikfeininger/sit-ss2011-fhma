@@ -15,10 +15,15 @@ namespace SIT.Forms
         protected void Page_Load(object sender, EventArgs e)
         {
             //TODO auskommentieren, damit man sich einloggen muss
-            //if (Session["ID"] != null) {
-            MainFrame.Visible = true;
-            //}
-            Session.Add("ID", "6");
+            if (Session["ID"] != null)
+            {
+                MainFrame.Visible = true;
+            }
+            else {
+                //Einloggen
+                HttpContext.Current.Response.Redirect("~/Forms/Login.aspx");
+            }
+            //Session.Add("ID", "7");
         }
 
         /// <summary>
@@ -184,17 +189,6 @@ namespace SIT.Forms
         }
 
         /// <summary>
-        /// Blendet das Panel zur Schlüsselweitergabe ein
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        protected void change_Click(object sender, EventArgs e)
-        {
-            //Öffnen oder Schließen
-            KeyExchangePanel.Visible = !(KeyExchangePanel.Visible);
-        }
-
-        /// <summary>
         /// Schlüsselweitergabe
         /// </summary>
         /// <param name="sender"></param>
@@ -222,6 +216,8 @@ namespace SIT.Forms
                             //Wenn keine Exception bis hier, dann wurde dem Benutzer der Schlüssel übergeben
                             Error.Text = "Der Schlüssel wurde erfolgreich an den Benutzer '" + UserSelect.SelectedItem.ToString() +"' weitergegeben.";
                             Error.Visible = true;
+                            //Seite neu laden
+                            HttpContext.Current.Response.Redirect("~/Forms/Intern.aspx");
                         }
                         catch (Exception ex)
                         {
@@ -229,19 +225,36 @@ namespace SIT.Forms
                             Error.Visible = true;
                         }
                     }
+                    else
+                    {
+                        Error.Text = "Das Secret für den Privatekey wurde falsch eingegeben";
+                        Error.Visible = true;
+                    }
                 
                 } 
-                else
-                {
-                    Error.Text = "Das Secret für den Privatekey wurde falsch eingegeben";
-                    Error.Visible = true;
-                }
             }
             else
             {
                 Error.Text = "Das Secret für den Privatekey muss gewählt werden";
                 Error.Visible = true;
             }
+        }
+
+        //Schlüssel eingezogen
+        protected void RelayedKeys_RowDeleted(object sender, GridViewDeletedEventArgs e)
+        {
+            //Neu laden
+            HttpContext.Current.Response.Redirect("~/Forms/Intern.aspx");
+        }
+
+        //Schlüssel einziehen
+        protected void RelayedKeys_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        {
+            //Tabellenzelle der ID holen und zum Deletestatement hinzufügen
+            EditKeys.DeleteParameters["ID"].DefaultValue = RelayedKeys.Rows[e.RowIndex].Cells[0].Text;
+            EditKeys.Delete();
+            //Default zurücksetzen
+            EditKeys.DeleteParameters["ID"].DefaultValue =String.Empty;
         }
     }
 }
