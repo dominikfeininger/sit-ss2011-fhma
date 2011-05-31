@@ -91,6 +91,17 @@ namespace SIT
         }
 
         /// <summary>
+        /// Erzeugt einen Neuen Masterkey für den Benutzer
+        /// </summary>
+        /// <param name="decryptedKeyChain">Entschlüsselter Schlüsselbund</param>
+        /// <param name="SelectAllMasterKeys">SelectAllMasterKeys-Verbindung</param>
+        public static void createNewMasterKey(KeyChain decryptedKeyChain, SqlDataSource SelectAllMasterKeys) {
+            String newMasterkey = encryptKeyAsym(generateMasterKey(), decryptedKeyChain.publicKey);
+            SelectAllMasterKeys.InsertParameters["MasterKey"].DefaultValue = newMasterkey;
+            SelectAllMasterKeys.Insert();
+        }
+
+        /// <summary>
         /// Entschlüsselt einen kompletten KeyChain
         /// </summary>
         /// <param name="fromDatabase"></param>
@@ -382,8 +393,8 @@ namespace SIT
                     //Erzeuge Schlüsselbund aus Headerstring
                     KeyChain headerKeyChain = getKeyChainFromHeader(header);
 
-                    //Prüfe ob der Benutzer ein Besitzer des Masterkeys ist
-                    MasterKeySelect.SelectParameters["OwnerID"].DefaultValue = headerKeyChain.masterKeyID;
+                    //Prüfe ob der Benutzer ein Besitzer des Masterkeys ist (Kopie oder Original)
+                    MasterKeySelect.SelectParameters["KeyID"].DefaultValue = headerKeyChain.masterKeyID;
                     DataView record = (DataView)MasterKeySelect.Select(DataSourceSelectArguments.Empty);
 
                     //Benutzer ist im Besitz des Schlüssels
@@ -474,17 +485,15 @@ namespace SIT
         /// <param name="userIDToRelay">Benutzer (ID) dem der Key übergeben werden soll</param>
         /// <param name="KeyExchange">SQL-Zugriff zum Schlüsselaustausch</param>
         /// <param name="SelectPublicKeyOfUser">SQL-Select um Public-Key des Benutzers zu laden</param>
-        public static void relayMasterKey(KeyChain userKeyChain, String userIDToRelay, SqlDataSource KeyExchange, SqlDataSource SelectPublicKeyOfUser)
+        public static void relayMasterKey(KeyChain userKeyChain, SqlDataSource KeyExchange, SqlDataSource SelectPublicKeyOfUser)
         { 
             //Testen ob bereits ein Schlüssel an den angegebenen Benutzer weitergegeben wurde
-            KeyExchange.SelectParameters["UserID"].DefaultValue = userIDToRelay;
             DataView isAvalaibleRecord = (DataView)KeyExchange.Select(DataSourceSelectArguments.Empty);
             
             //Select gibt mindestens einen Record zurück => Schlüssel existiert bereits
             if (isAvalaibleRecord.Count < 1)
             {
                 //PublicKey des angegebenen Benutzers laden
-                SelectPublicKeyOfUser.SelectParameters["ID"].DefaultValue = userIDToRelay;
                 DataView publicKeyRecord = (DataView)SelectPublicKeyOfUser.Select(DataSourceSelectArguments.Empty);
 
                 //Wenn PublicKey geladen werden konnte
@@ -495,12 +504,10 @@ namespace SIT
                     //Masterkey mit PublicKey des gewählten Benutzers verschlüsseln
                     String masterKey = encryptKeyAsym(userKeyChain.masterKey, publicKey);
                     //Masterkey dem Benutzer zugeordnet in der DB speichern
-                    KeyExchange.InsertParameters["UserID"].DefaultValue = userIDToRelay;
                     KeyExchange.InsertParameters["MasterKey"].DefaultValue = masterKey;
                     KeyExchange.Insert();
 
                     //Defaultwerte des Inserts zurücksetzen
-                    KeyExchange.InsertParameters["UserID"].DefaultValue = null;
                     KeyExchange.InsertParameters["MasterKey"].DefaultValue = null;
                 }
                 else {
