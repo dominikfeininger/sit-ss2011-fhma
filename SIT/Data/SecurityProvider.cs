@@ -92,7 +92,6 @@ namespace SIT
 
         /// <summary>
         /// Entschlüsselt einen kompletten KeyChain
-        /// TODO
         /// </summary>
         /// <param name="fromDatabase"></param>
         /// <returns></returns>
@@ -173,7 +172,7 @@ namespace SIT
                 // mit den verschlüsselten Daten zuweisen.
                 MemoryStream memoryStream = new MemoryStream(keyAsByte);
 
-                //Passwort hashen
+                //Passwort als MD5 Hashen, weil MD5 als Schlüssel für CreateDecryptor aktzeptiert wird
                 MD5 md5Hash = new MD5CryptoServiceProvider();
                 byte[] hash = md5Hash.ComputeHash(stringToByteArray(password));
 
@@ -185,8 +184,6 @@ namespace SIT
                 // Buffer erstellen um die entschlüsselten Daten zuzuweisen.
                 byte[] fromEncrypt = new byte[keyAsByte.Length];
 
-                // Read the decrypted data out of the crypto stream
-                // and place it into the temporary buffer.
                 // Die entschlüsselten Daten aus dem CryptoStream lesen
                 // und im temporären Puffer ablegen.
                 cryptoStream.Read(fromEncrypt, 0, fromEncrypt.Length);
@@ -313,7 +310,6 @@ namespace SIT
 
         /// <summary>
         /// Entschlüsselt eine Datei 
-        /// ! NICHT GETESTET !
         /// </summary>
         /// <param name="inName"></param>
         /// <param name="outName"></param>
@@ -471,6 +467,13 @@ namespace SIT
             return keyChain;
         }
 
+        /// <summary>
+        /// Masterkey weitergeben
+        /// </summary>
+        /// <param name="userKeyChain">Entschlüsselter Schlüsselbund des Benutzers</param>
+        /// <param name="userIDToRelay">Benutzer (ID) dem der Key übergeben werden soll</param>
+        /// <param name="KeyExchange">SQL-Zugriff zum Schlüsselaustausch</param>
+        /// <param name="SelectPublicKeyOfUser">SQL-Select um Public-Key des Benutzers zu laden</param>
         public static void relayMasterKey(KeyChain userKeyChain, String userIDToRelay, SqlDataSource KeyExchange, SqlDataSource SelectPublicKeyOfUser)
         { 
             //Testen ob bereits ein Schlüssel an den angegebenen Benutzer weitergegeben wurde

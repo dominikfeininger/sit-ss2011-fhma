@@ -17,6 +17,10 @@ namespace SIT.Forms
             //TODO auskommentieren, damit man sich einloggen muss
             if (Session["ID"] != null)
             {
+                //Username laden und anzeigen
+                DataView user = (DataView)GetCurrentUser.Select(DataSourceSelectArguments.Empty);
+                UserLabel.Text = user[0]["name"].ToString();
+                //Internen Bereich anzeigen
                 MainFrame.Visible = true;
             }
             else {
@@ -123,9 +127,13 @@ namespace SIT.Forms
                         {
                             //Datei aus dem Fileupload speichern
                             UploadFile.SaveAs(SIT_Ressources.EncryptedPath + UploadFile.FileName);
+                            //Fileinfo zur abgelegten Datei holen, um später wieder löschen zu können
+                            FileInfo savedFile = new FileInfo(SIT_Ressources.EncryptedPath + UploadFile.FileName);
                             //Schlüsselbund erzeugen und entschlüsseln
                             KeyChain encryptedKeychain = getCurrentKeyChain();
                             sendFile(SecurityProvider.decryptFile(UploadFile.FileName, GetMasterKey, encryptedKeychain));
+                            //gespeicherte Datei löschen
+                            savedFile.Delete();
                         }
                         catch (Exception ex)
                         {
@@ -153,7 +161,7 @@ namespace SIT.Forms
         }
 
         /// <summary>
-        /// Sendet dem Benutzer eine Daten
+        /// Sendet dem Benutzer eine Datei
         /// </summary>
         /// <param name="filename">Dateiname der Datei, die gesendet wurde</param>
         /// <param name="filepath">Pfad zur Datei im System</param>
@@ -164,8 +172,13 @@ namespace SIT.Forms
             HttpContext.Current.Response.AddHeader("Content-Disposition", string.Format("attachment; filename={0}", downloadFile.Name));
             HttpContext.Current.Response.AddHeader("Content-Length", downloadFile.Length.ToString());
             HttpContext.Current.Response.ContentType = "application/octet-stream";
-            HttpContext.Current.Response.WriteFile(downloadFile.FullName);
-            HttpContext.Current.Response.End();
+            HttpContext.Current.Response.TransmitFile(downloadFile.FullName);
+            HttpContext.Current.Response.Flush();
+            HttpContext.Current.Response.Close();
+            downloadFile.Delete();
+            //Response.End() darf nicht gerufen werden (http://support.microsoft.com/kb/312629/EN-US/) löst eine Exception aus
+            //HttpContext.Current.Response.End();
+
         }
 
         /// <summary>
