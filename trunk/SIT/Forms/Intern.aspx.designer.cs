@@ -31,6 +31,15 @@ namespace SIT.Forms {
         protected global::System.Web.UI.WebControls.Panel MainFrame;
         
         /// <summary>
+        /// UserLabel-Steuerelement
+        /// </summary>
+        /// <remarks>
+        /// Automatisch generiertes Feld
+        /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label UserLabel;
+        
+        /// <summary>
         /// logout-Steuerelement
         /// </summary>
         /// <remarks>
@@ -191,5 +200,23 @@ namespace SIT.Forms {
         /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
         /// </remarks>
         protected global::System.Web.UI.WebControls.SqlDataSource SelectPublicKeyOfUser;
+        
+        /// <summary>
+        /// GetCurrentUser-Steuerelement
+        /// </summary>
+        /// <remarks>
+        /// Automatisch generiertes Feld
+        /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.SqlDataSource GetCurrentUser;
+        
+        /// <summary>
+        /// SelectAllMasterkeys-Steuerelement
+        /// </summary>
+        /// <remarks>
+        /// Automatisch generiertes Feld
+        /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.SqlDataSource SelectAllMasterkeys;
     }
 }

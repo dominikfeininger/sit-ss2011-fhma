@@ -8,17 +8,29 @@
     <style type="text/css">
         .style2
         {
-            width: 260px;
+            width: 30%;
             font-size: large;
         }
         .style3
         {
-            width: 245px;
+            width: 50%;
             text-align: right;
         }
         .style4
         {
-            width: 360px;
+            width: 50%;
+        }
+        .style5
+        {
+            width: 30%;
+        }
+        .style6
+        {
+            font-size: small;
+        }
+        .style7
+        {
+            font-size: xx-small;
         }
     </style>
 </head>
@@ -33,6 +45,10 @@
                 <tr>
                     <td class="style2">
                         <strong>Interner Bereich</strong></td>
+                    <td style="text-align: center" class="style5">
+                        <span class="style6">Angemeldet als: </span>
+                        <asp:Label ID="UserLabel" runat="server" CssClass="style6" Text="User"></asp:Label>
+                    </td>
                     <td style="text-align: right">
                         <asp:Button ID="logout" runat="server" onclick="logout_Click" 
                             style="text-align: right" Text="Logout" />
@@ -40,8 +56,9 @@
                 </tr>
             </table>
         </div>
-        <div style="padding: 10px; border: thin solid #2380B1; background-color: #005B88; margin-top: 10px; z-index: auto;">
-            Private Key Secret:
+        <div style="padding: 10px; border: thin solid #2380B1; background-color: #005B88; margin-top: 10px; z-index: auto; text-align: center; vertical-align: middle;">
+            Private Key Secret <span class="style7">(muss für jeden Vorgang angegeben 
+            werden)</span>:
             <asp:TextBox ID="privateSecret" runat="server" TextMode="Password"></asp:TextBox>
         </div>
         <div style="padding-top: 10px; padding-bottom: 10px;">
@@ -65,6 +82,7 @@
                         <td class="style3">
                             <asp:Button ID="uploadButton" runat="server" onclick="uploadButton_Click" 
                                 Text="Verschlüsseln" />
+                            <br />
                             <asp:Button ID="decryptButton" runat="server" onclick="decryptButton_Click" 
                                 style="text-align: center" Text="Entschlüsseln" />
                         </td>
@@ -183,6 +201,13 @@
             SelectCommand="SELECT [ID], [PublicKey] FROM [Users] WHERE ([ID] = @ID)">
             <SelectParameters>
                 <asp:Parameter Name="ID" Type="Int32" />
+            </SelectParameters>
+        </asp:SqlDataSource>
+        <asp:SqlDataSource ID="GetCurrentUser" runat="server" 
+            ConnectionString="<%$ ConnectionStrings:SIT_Database %>" 
+            SelectCommand="SELECT [ID], [name] FROM [Users] WHERE ([ID] = @ID)">
+            <SelectParameters>
+                <asp:SessionParameter Name="ID" SessionField="ID" Type="Int32" />
             </SelectParameters>
         </asp:SqlDataSource>
         <br />
