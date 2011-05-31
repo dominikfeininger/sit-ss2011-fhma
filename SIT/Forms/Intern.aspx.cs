@@ -195,7 +195,8 @@ namespace SIT.Forms
             keyChain.publicKey = dv[0]["PublicKey"].ToString();
             keyChain.privateKey = dv[0]["PrivateKey"].ToString();
             keyChain.masterKey = dv[0]["MasterKey"].ToString();
-            keyChain.masterKeyID = Session["ID"].ToString();
+            keyChain.masterKeyID = dv[0]["ID"].ToString();
+            keyChain.UserID = Session["ID"].ToString();
             //Schlüsselbund entschlüsseln
             KeyChain encryptedKeychain = SecurityProvider.decryptKeyChain(keyChain, privateSecret.Text);
             return encryptedKeychain;
@@ -225,7 +226,7 @@ namespace SIT.Forms
                         try
                         {
                             //Schlüsselbund, BenutzerID und Datenverbindung übergeben
-                            SecurityProvider.relayMasterKey(getCurrentKeyChain(), UserSelect.SelectedItem.Value, KeyExchange, SelectPublicKeyOfUser);
+                            SecurityProvider.relayMasterKey(getCurrentKeyChain(), KeyExchange, SelectPublicKeyOfUser);
                             //Wenn keine Exception bis hier, dann wurde dem Benutzer der Schlüssel übergeben
                             Error.Text = "Der Schlüssel wurde erfolgreich an den Benutzer '" + UserSelect.SelectedItem.ToString() +"' weitergegeben.";
                             Error.Visible = true;
@@ -264,10 +265,48 @@ namespace SIT.Forms
         protected void RelayedKeys_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             //Tabellenzelle der ID holen und zum Deletestatement hinzufügen
-            EditKeys.DeleteParameters["ID"].DefaultValue = RelayedKeys.Rows[e.RowIndex].Cells[0].Text;
+            EditKeys.DeleteParameters["ID"].DefaultValue = RelayedKeys.Rows[e.RowIndex].Cells[1].Text;
             EditKeys.Delete();
             //Default zurücksetzen
             EditKeys.DeleteParameters["ID"].DefaultValue =String.Empty;
+        }
+
+        //Neuen Schlüssel generieren
+        protected void GenerateKey_Click(object sender, EventArgs e)
+        {
+            //Wenn kein Passwort eingegeben
+            if (!privateSecret.Text.Equals(""))
+            {
+                //Passwort überprüfen
+                checkPrivatePasswort.SelectParameters["PrivateKeyPassword"].DefaultValue = SecurityProvider.hashPassword(privateSecret.Text);
+                //Benutze das angelegte Control zum Select
+                DataView dv1 = (DataView)checkPrivatePasswort.Select(DataSourceSelectArguments.Empty);
+                //Wenn es genau einen Record gibt wurde das richtige Passwort gewählt
+                if (dv1.Count == 1)
+                {
+                    try
+                    {
+                        //Neuen Key erzeugen
+                        SecurityProvider.createNewMasterKey(getCurrentKeyChain(), SelectAllMasterKeys);
+                    }
+                    catch (Exception ex)
+                    {
+                        Error.Text = "Fehler beim Anlegen eines neuen Schlüssels: " + ex.Message;
+                        Error.Visible = true;
+                    }
+                }
+                else
+                {
+                    Error.Text = "Das Secret für den Privatekey wurde falsch eingegeben";
+                    Error.Visible = true;
+                }
+            }
+            else
+            {
+                Error.Text = "Das Secret für den Privatekey muss gewählt werden";
+                Error.Visible = true;
+            }
+
         }
     }
 }

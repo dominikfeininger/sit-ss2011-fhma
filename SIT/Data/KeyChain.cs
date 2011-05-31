@@ -7,5 +7,7 @@ namespace SIT
         public String privateKey;
         public String masterKey;
         public String masterKeyID;
+
+        public String UserID;
     }
 }

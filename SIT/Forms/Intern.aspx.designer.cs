@@ -67,6 +67,15 @@ namespace SIT.Forms {
         protected global::System.Web.UI.WebControls.Label Error;
         
         /// <summary>
+        /// KeyIDList-Steuerelement
+        /// </summary>
+        /// <remarks>
+        /// Automatisch generiertes Feld
+        /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList KeyIDList;
+        
+        /// <summary>
         /// UploadFile-Steuerelement
         /// </summary>
         /// <remarks>
@@ -121,6 +130,15 @@ namespace SIT.Forms {
         protected global::System.Web.UI.WebControls.DropDownList UserSelect;
         
         /// <summary>
+        /// KeyIDListExchange-Steuerelement
+        /// </summary>
+        /// <remarks>
+        /// Automatisch generiertes Feld
+        /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList KeyIDListExchange;
+        
+        /// <summary>
         /// Button1-Steuerelement
         /// </summary>
         /// <remarks>
@@ -128,6 +146,15 @@ namespace SIT.Forms {
         /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button Button1;
+        
+        /// <summary>
+        /// GenerateKey-Steuerelement
+        /// </summary>
+        /// <remarks>
+        /// Automatisch generiertes Feld
+        /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button GenerateKey;
         
         /// <summary>
         /// GetMasterKey-Steuerelement
@@ -211,12 +238,12 @@ namespace SIT.Forms {
         protected global::System.Web.UI.WebControls.SqlDataSource GetCurrentUser;
         
         /// <summary>
-        /// SelectAllMasterkeys-Steuerelement
+        /// SelectAllMasterKeys-Steuerelement
         /// </summary>
         /// <remarks>
         /// Automatisch generiertes Feld
         /// Um dies zu ändern, verschieben Sie die Felddeklaration aus der Designerdatei in eine Code-Behind-Datei.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.SqlDataSource SelectAllMasterkeys;
+        protected global::System.Web.UI.WebControls.SqlDataSource SelectAllMasterKeys;
     }
 }

@@ -73,7 +73,11 @@
                         <td class="style4">
                             Datei:</td>
                         <td class="style3">
-                        </td>
+                            Schlüssel ID:
+                            <asp:DropDownList ID="KeyIDList" runat="server" 
+                                DataSourceID="SelectAllMasterKeys" DataTextField="ID" DataValueField="ID">
+                            </asp:DropDownList>
+                            &nbsp;</td>
                     </tr>
                     <tr>
                         <td class="style4">
@@ -82,6 +86,7 @@
                         <td class="style3">
                             <asp:Button ID="uploadButton" runat="server" onclick="uploadButton_Click" 
                                 Text="Verschlüsseln" />
+                            <br />
                             <br />
                             <asp:Button ID="decryptButton" runat="server" onclick="decryptButton_Click" 
                                 style="text-align: center" Text="Entschlüsseln" />
@@ -96,14 +101,16 @@
                 <div style="border: thin dashed #5BB1DF; padding: 5px; background-color: #0077B0;">
                     Erhaltene Schlüssel<div 
                         style="border: thin solid #0D557B; margin: 7px 0px 0px 0px; padding: 5px; background-color: #116C9D;">
-                        Sie besitzen die Schlüssel der folgenden Benutzer:<br />
+                        Sie besitzen die Schlüssel von folgenden Benutzern:<br />
                         <br />
                         <asp:GridView ID="AllKeysView" runat="server" AllowPaging="True" 
                             AutoGenerateColumns="False" CellPadding="2" CellSpacing="1" 
-                            DataSourceID="SelectAllKeys">
+                            DataSourceID="SelectAllKeys" DataKeyNames="SchlüsselD" AllowSorting="True">
                             <Columns>
                                 <asp:BoundField DataField="Name" HeaderText="Benutzername" 
                                     SortExpression="Name" />
+                                <asp:BoundField DataField="SchlüsselD" HeaderText="Schlüsselnummer" 
+                                    InsertVisible="False" ReadOnly="True" SortExpression="SchlüsselD" />
                             </Columns>
                         </asp:GridView>
                     </div>
@@ -111,15 +118,21 @@
                 <div style="border: thin dashed #5BB1DF; padding: 5px; background-color: #0077B0; margin-top: 10px;">
                     Weitergereichte Schlüssel<div 
                         style="border: thin solid #0D557B; margin: 7px 0px 0px 0px; padding: 5px; background-color: #116C9D;">
+                        Sie haben ihre Schlüssel wie folgt verteilt:<br />
+                        <br />
                         <asp:GridView ID="RelayedKeys" runat="server" AllowPaging="True" 
-                            AllowSorting="True" AutoGenerateColumns="False" DataKeyNames="SchlüsselID" 
+                            AllowSorting="True" AutoGenerateColumns="False" DataKeyNames="ID" 
                             DataSourceID="EditKeys" onrowdeleted="RelayedKeys_RowDeleted" 
                             onrowdeleting="RelayedKeys_RowDeleting">
                             <Columns>
-                                <asp:BoundField DataField="SchlüsselID" HeaderText="SchlüsselID" 
-                                    InsertVisible="False" ReadOnly="True" SortExpression="SchlüsselID" />
-                                <asp:BoundField DataField="Name" HeaderText="Name" SortExpression="Name" />
-                                <asp:ButtonField ButtonType="Button" CommandName="Delete" Text="Löschen" />
+                                <asp:BoundField DataField="ID" HeaderText="ID" 
+                                    SortExpression="ID" InsertVisible="False" ReadOnly="True" 
+                                    Visible="False" />
+                                <asp:BoundField DataField="SchlüsselID" HeaderText="Schlüsselnummer" 
+                                    SortExpression="SchlüsselID" />
+                                <asp:BoundField DataField="Name" HeaderText="Benutzername" 
+                                    SortExpression="Name" />
+                                <asp:CommandField ButtonType="Button" ShowDeleteButton="True" />
                             </Columns>
                         </asp:GridView>
                         </div>
@@ -128,28 +141,44 @@
                     Schlüssel weiterreichen
                     <div 
                         style="border: thin solid #0D557B; margin: 7px 0px 0px 0px; padding: 5px; background-color: #116C9D;">
+                        Benutzer:
                         <asp:DropDownList ID="UserSelect" runat="server" DataSourceID="SelectAllUsers" 
                             DataTextField="Name" DataValueField="ID">
                         </asp:DropDownList>
-                        <asp:Button ID="Button1" runat="server" onclick="Button1_Click" 
+                        &nbsp;Schlüssel:
+                        <asp:DropDownList ID="KeyIDListExchange" runat="server" 
+                            DataSourceID="SelectAllMasterKeys" DataTextField="ID" DataValueField="ID">
+                        </asp:DropDownList>
+                        &nbsp;<asp:Button ID="Button1" runat="server" onclick="Button1_Click" 
                             Text="Weiterreichen" />
                     </div>
                 </div>
+                <div style="border: thin dashed #5BB1DF; padding: 5px; background-color: #0077B0; margin-top: 10px;">
+                    Schlüssel generieren<div 
+                        style="border: thin solid #0D557B; margin: 7px 0px 0px 0px; padding: 5px; background-color: #116C9D;">
+                        <asp:Button ID="GenerateKey" runat="server" onclick="GenerateKey_Click" 
+                            Text="Neuen Schlüssel generieren" />
+                        </div>
+                 </div>
             </div>
         </div>
         <asp:SqlDataSource ID="GetMasterKey" runat="server" 
             ConnectionString="<%$ ConnectionStrings:SIT_Database %>" 
-            SelectCommand="SELECT [OwnerID], [MasterKey] FROM [MasterKeys] WHERE (([UserID] = @UserID) AND ([OwnerID] = @OwnerID))">
+            
+            
+            SelectCommand="SELECT ID, MasterKey FROM MasterKeys WHERE (UserID = @UserID) AND (OriginalID = @KeyID) OR (UserID = @UserID) AND (ID = @KeyID)">
             <SelectParameters>
                 <asp:SessionParameter Name="UserID" SessionField="ID" Type="Int32" />
-                <asp:Parameter Name="OwnerID" Type="Int32" />
+                <asp:Parameter Name="KeyID" />
             </SelectParameters>
         </asp:SqlDataSource>
         <asp:SqlDataSource ID="SelectPublicKey" runat="server" 
             ConnectionString="<%$ ConnectionStrings:SIT_Database %>" 
-            SelectCommand="SELECT Users.PublicKey, Users.PrivateKey, MasterKeys.MasterKey, MasterKeys.ID FROM Users INNER JOIN MasterKeys ON Users.ID = MasterKeys.UserID WHERE (Users.ID = @ID)">
+            
+            SelectCommand="SELECT Users.PublicKey, Users.PrivateKey, MasterKeys.MasterKey, MasterKeys.ID FROM Users INNER JOIN MasterKeys ON Users.ID = MasterKeys.UserID WHERE (MasterKeys.ID = @MasterKeyID)">
             <SelectParameters>
-                <asp:SessionParameter Name="ID" SessionField="ID" Type="Int32" />
+                <asp:ControlParameter ControlID="KeyIDList" Name="MasterKeyID" 
+                    PropertyName="SelectedValue" />
             </SelectParameters>
         </asp:SqlDataSource>
         <asp:SqlDataSource ID="checkPrivatePasswort" runat="server" 
@@ -162,7 +191,9 @@
         </asp:SqlDataSource>
         <asp:SqlDataSource ID="SelectAllKeys" runat="server" 
             ConnectionString="<%$ ConnectionStrings:SIT_Database %>" 
-            SelectCommand="SELECT Users.name AS Name FROM MasterKeys INNER JOIN Users ON MasterKeys.OwnerID = Users.ID WHERE (MasterKeys.UserID = @user )">
+            
+            
+            SelectCommand="SELECT Users.name AS Name, MasterKeys.OriginalID AS SchlüsselD FROM MasterKeys INNER JOIN Users ON MasterKeys.OwnerID = Users.ID WHERE (MasterKeys.UserID = @user ) AND (MasterKeys.IsCopy = 1)">
             <SelectParameters>
                 <asp:SessionParameter Name="user" SessionField="ID" />
             </SelectParameters>
@@ -170,7 +201,9 @@
         <asp:SqlDataSource ID="EditKeys" runat="server" 
             ConnectionString="<%$ ConnectionStrings:SIT_Database %>" 
             DeleteCommand="DELETE FROM MasterKeys WHERE (ID = @ID)" 
-            SelectCommand="SELECT MasterKeys.ID AS SchlüsselID, Users.name AS Name FROM MasterKeys INNER JOIN Users ON MasterKeys.UserID = Users.ID WHERE (MasterKeys.OwnerID = @ID) AND (MasterKeys.IsCopy = 1)">
+            
+            
+            SelectCommand="SELECT MasterKeys.ID, MasterKeys.OriginalID AS SchlüsselID, Users.name AS Name FROM MasterKeys INNER JOIN Users ON MasterKeys.UserID = Users.ID WHERE (MasterKeys.OwnerID = @ID) AND (MasterKeys.IsCopy = 1)">
             <DeleteParameters>
                 <asp:Parameter Name="ID" />
             </DeleteParameters>
@@ -180,27 +213,37 @@
         </asp:SqlDataSource>
         <asp:SqlDataSource ID="KeyExchange" runat="server" 
             ConnectionString="<%$ ConnectionStrings:SIT_Database %>" 
-            InsertCommand="INSERT INTO MasterKeys(UserID, MasterKey, IsCopy, OwnerID) VALUES (@UserID, @MasterKey, 1, @OwnerID)" 
-            SelectCommand="SELECT ID, MasterKey, IsCopy, OwnerID, UserID FROM MasterKeys WHERE (UserID = @UserID) AND (OwnerID = @OwnerID)">
+            InsertCommand="INSERT INTO MasterKeys(UserID, MasterKey, IsCopy, OwnerID, OriginalID) VALUES (@UserID, @MasterKey, 1, @OwnerID, @OriginalID)" 
+            
+            SelectCommand="SELECT ID, MasterKey, IsCopy, OwnerID, UserID, OriginalID FROM MasterKeys WHERE (UserID = @UserID) AND (OriginalID = @OriginalID)">
             <InsertParameters>
-                <asp:Parameter Name="UserID" />
+                <asp:ControlParameter ControlID="UserSelect" Name="UserID" 
+                    PropertyName="SelectedValue" />
                 <asp:Parameter Name="MasterKey" />
                 <asp:SessionParameter Name="OwnerID" SessionField="ID" />
+                <asp:ControlParameter ControlID="KeyIDListExchange" Name="OriginalID" 
+                    PropertyName="SelectedValue" />
             </InsertParameters>
             <SelectParameters>
-                <asp:Parameter Name="UserID" />
-                <asp:SessionParameter Name="OwnerID" SessionField="ID" />
+                <asp:ControlParameter ControlID="UserSelect" Name="UserID" 
+                    PropertyName="SelectedValue" />
+                <asp:ControlParameter ControlID="KeyIDListExchange" Name="OriginalID" 
+                    PropertyName="SelectedValue" />
             </SelectParameters>
         </asp:SqlDataSource>
         <asp:SqlDataSource ID="SelectAllUsers" runat="server" 
             ConnectionString="<%$ ConnectionStrings:SIT_Database %>" 
-            SelectCommand="SELECT [name] as Name, [ID] FROM [Users]">
+            SelectCommand="SELECT name AS Name, ID FROM Users WHERE (ID &lt;&gt; @ID)">
+            <SelectParameters>
+                <asp:SessionParameter Name="ID" SessionField="ID" />
+            </SelectParameters>
         </asp:SqlDataSource>
         <asp:SqlDataSource ID="SelectPublicKeyOfUser" runat="server" 
             ConnectionString="<%$ ConnectionStrings:SIT_Database %>" 
             SelectCommand="SELECT [ID], [PublicKey] FROM [Users] WHERE ([ID] = @ID)">
             <SelectParameters>
-                <asp:Parameter Name="ID" Type="Int32" />
+                <asp:ControlParameter ControlID="UserSelect" Name="ID" 
+                    PropertyName="SelectedValue" Type="Int32" />
             </SelectParameters>
         </asp:SqlDataSource>
         <asp:SqlDataSource ID="GetCurrentUser" runat="server" 
@@ -208,6 +251,20 @@
             SelectCommand="SELECT [ID], [name] FROM [Users] WHERE ([ID] = @ID)">
             <SelectParameters>
                 <asp:SessionParameter Name="ID" SessionField="ID" Type="Int32" />
+            </SelectParameters>
+        </asp:SqlDataSource>
+        <asp:SqlDataSource ID="SelectAllMasterKeys" runat="server" 
+            ConnectionString="<%$ ConnectionStrings:SIT_Database %>" 
+            InsertCommand="INSERT INTO MasterKeys(UserID, MasterKey, IsCopy, OwnerID) VALUES (@UserID, @MasterKey, @IsCopy, @OwnerID)" 
+            SelectCommand="SELECT ID FROM MasterKeys WHERE (UserID = @ID) AND (OwnerID = @ID)">
+            <InsertParameters>
+                <asp:SessionParameter Name="UserID" SessionField="ID" />
+                <asp:Parameter Name="MasterKey" />
+                <asp:Parameter DefaultValue="0" Name="IsCopy" />
+                <asp:SessionParameter Name="OwnerID" SessionField="ID" />
+            </InsertParameters>
+            <SelectParameters>
+                <asp:SessionParameter Name="ID" SessionField="ID" />
             </SelectParameters>
         </asp:SqlDataSource>
         <br />
