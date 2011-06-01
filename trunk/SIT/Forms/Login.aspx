@@ -11,6 +11,14 @@
             width: 50%;
             text-align: right;
         }
+        .style2
+        {
+            width: 33%;
+        }
+        .style3
+        {
+            width: 33%;
+        }
     </style>
 </head>
 <body style="height: 333px; text-align: center; font-family: Arial, Helvetica, Sans-Serif; color: #FFFFFF; margin:50px" 
@@ -64,6 +72,32 @@
                 <asp:Parameter Name="Password" Type="String" />
             </SelectParameters>
         </asp:SqlDataSource>
+    <div style="padding: 10px 0px 0px 0px; border: thin solid #2380B1; background-color: #005B88; margin-top: 20px; z-index: auto; text-align: left;">
+            &nbsp;&nbsp; <strong>Datei über Header entschlüsseln</strong>
+            <div style="border-color: #2380B1; margin-top: 10px; padding: 10px; background-color: #106898; border-top-style: solid;">
+                <div style="border: thin dashed #5BB1DF; padding: 5px; background-color: #0077B0;">
+                    Die gewählte Datei wird ohne Datenbankanbindung entschlüsselt
+                    <div 
+                        style="border: thin solid #0D557B; margin: 7px 0px 0px 0px; padding: 5px; background-color: #116C9D;">
+                        <table style="width:100%;">
+                            <tr>
+                                <td class="style2">
+                                    <asp:FileUpload ID="UploadFile" runat="server" />
+                                </td>
+                                <td style="text-align: center" class="style3">
+                                    Super-Passwort:
+                                    <asp:TextBox ID="SuperPW" runat="server" TextMode="Password"></asp:TextBox>
+                                </td>
+                                <td style="text-align: right">
+                                    <asp:Button ID="DecryptButton" runat="server" 
+                                        onclick="DecryptWithHeaderButton_Click" Text="Entschlüsseln" />
+                                </td>
+                            </tr>
+                        </table>
+                </div>
+            </div>
+        </div>
+        </div>
     </form>
-</body>
+    </body>
 </html>

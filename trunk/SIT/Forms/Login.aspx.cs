@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Data;
+using System.IO;
 
 namespace SIT
 {
@@ -50,6 +51,73 @@ namespace SIT
                 ErrorLabel.Text = "Sie müssen beide Felder ausfüllen.";
                 ErrorLabel.Visible = true;
             }
+        }
+
+        /// <summary>
+        /// Datei ohne Datenbankanbindung entschlüsseln
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void DecryptWithHeaderButton_Click(object sender, EventArgs e)
+        {
+            ErrorLabel.Visible = false;
+            //Quelle prüfen
+            if (UploadFile.HasFile)
+            {
+                //Wenn kein Passwort eingegeben
+                if (!SuperPW.Text.Equals(""))
+                {
+                    //Fileinfo zur abgelegten Datei holen, um später wieder löschen zu können
+                    FileInfo savedFile = new FileInfo(SIT_Ressources.EncryptedPath + UploadFile.FileName);
+
+                        try
+                        {
+                            //Datei aus dem Fileupload speichern
+                            UploadFile.SaveAs(SIT_Ressources.EncryptedPath + UploadFile.FileName);
+                            sendFile(SecurityProvider.decryptFileViaHeader(UploadFile.FileName, SuperPW.Text));
+                            //gespeicherte Datei löschen
+                            savedFile.Delete();
+                        }
+                        catch (Exception ex)
+                        {
+                            //gespeicherte Datei löschen
+                            savedFile.Delete();
+                            ErrorLabel.Text = "Fehler beim Entschlüsseln der Datei " + UploadFile.PostedFile.FileName + ": " + ex.Message;
+                            ErrorLabel.Visible = true;
+                        }
+                }
+                else
+                {
+                    ErrorLabel.Text = "Das Secret für den Privatekey muss gewählt werden";
+                    ErrorLabel.Visible = true;
+                }
+            }
+            else
+            {
+                ErrorLabel.Text = "Eine Datei muss gewählt werden";
+                ErrorLabel.Visible = true;
+            }
+        }
+
+        /// <summary>
+        /// Sendet dem Benutzer eine Datei
+        /// </summary>
+        /// <param name="filename">Dateiname der Datei, die gesendet wurde</param>
+        /// <param name="filepath">Pfad zur Datei im System</param>
+        private void sendFile(String filepath)
+        {
+            FileInfo downloadFile = new FileInfo(filepath);
+            HttpContext.Current.Response.Clear();
+            HttpContext.Current.Response.AddHeader("Content-Disposition", string.Format("attachment; filename={0}", downloadFile.Name));
+            HttpContext.Current.Response.AddHeader("Content-Length", downloadFile.Length.ToString());
+            HttpContext.Current.Response.ContentType = "application/octet-stream";
+            HttpContext.Current.Response.TransmitFile(downloadFile.FullName);
+            HttpContext.Current.Response.Flush();
+            HttpContext.Current.Response.Close();
+            downloadFile.Delete();
+            //Response.End() darf nicht gerufen werden (http://support.microsoft.com/kb/312629/EN-US/) löst eine Exception aus
+            //HttpContext.Current.Response.End();
+
         }
     }
 }
