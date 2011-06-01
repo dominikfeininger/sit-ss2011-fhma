@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Web.UI.WebControls;
 using System.Data;
 using System.Web.UI;
+using System.Threading;
 
 namespace SIT
 {
@@ -19,7 +20,7 @@ namespace SIT
     {
 
         //Masterpasswort
-        private static String masterpw = "SIT2011MASTER";
+        private static String masterpw = "SIT2011MASTER123456789fsdfhrqdfoiq3rzihbqirsadfbvciurw";
 
         /// <summary>
         /// Hasht ein Passwort mit dem Secure Hash Algorithm (Länge 256)
@@ -519,6 +520,157 @@ namespace SIT
                 //Es ist zusätzlich ein Unique-Key in der Datenbank gesetzt um ein doppeltes Eintragen der Konstellation UserID - OwnerID zu verhindern
                 throw new Exception("Ihr Schlüssel wurde bereits an den gewählten Benutzer weitergegeben.");
             }
+        }
+
+        /// <summary>
+        /// Entschlüsselt eine Datei über den Header
+        /// </summary>
+        /// <param name="filename">Dateiname der Datei, die entschlüsselt werden soll</param>
+        /// <param name="password">Passwort zum entschlüsseln</param>
+        /// <returns>Pfad zur entschlüsselten Datei</returns>
+        public static String decryptFileViaHeader(String filename, String password){
+            //Initialisierungsvektor laden
+            byte[] tDesIV = iv;
+
+            //Filestreams für Input- und Output-File erzeugen.
+            FileStream fin1 = new FileStream(SIT_Ressources.EncryptedPath + filename, FileMode.Open, FileAccess.Read);
+
+            //Header laden
+            LinkedList<String> headerList = new LinkedList<String>();
+            byte[] headerByte = new byte[1000];
+            int length = 0;
+
+            //Headerlänge ermitteln
+            bool DataTagFound = false;
+            while (!DataTagFound && length < fin1.Length)
+            {
+                //Zeichen lesen
+                length += fin1.Read(headerByte, 0, 1000);
+                //Zeichen zwischenspeichern
+                headerList.AddLast(byteArrayToString(headerByte));
+                //Aktuellen String prüfen, ob der Datenblock erreicht wurde
+                if (headerList.Last.Value.Contains("[Data]"))
+                {
+                    DataTagFound = true;
+                }
+                else
+                {
+                    //Position um 500 Zeichen nach vorne verlegen um String richtig zu lesen
+                    fin1.Position -= 500;
+                }
+            }
+            //Ersten Filestream schließen
+            fin1.Close();
+
+            //Wenn der Header richtig gesetzt wurde
+            if (DataTagFound)
+            {
+                //Header erstellen
+                StringBuilder headerBuilder = new StringBuilder();
+                //Zähler um nur gerade Indizes zum Stringbuilder hinzuzufügen
+                int i = 0;
+                foreach (String current in headerList)
+                {
+                    //Wenn gerader Index, füge zum Stringbuilder hinzu
+                    if (i % 2 == 0)
+                    {
+                        headerBuilder.Append(current);
+                    }
+                    i++;
+                }
+
+                //Filestream für Input-File erzeugen frisch erzeugen
+                Stream fin2 = new FileStream(SIT_Ressources.EncryptedPath + filename, FileMode.Open, FileAccess.Read);
+
+                //Header als String laden
+                String header = headerBuilder.ToString();
+                //String auf nötiges reduzieren
+                Regex headerRegex = new Regex("\\[KeyID](.|\n)*\\[Public](.|\n)*\\[Private](.|\n)*\\[Master](.|\n)*\\[Data]");
+                //Header zu Regex matchen
+                Match headerMatch = headerRegex.Match(header);
+                header = headerMatch.Value;
+
+                //Wenn kein Ergebnis vom Regulären Ausdruck, dann wurde die Syntax der Datei geändert -> Abbruch
+                if (header != null)
+                {
+                    //Erzeuge Schlüsselbund aus Headerstring
+                    KeyChain headerKeyChain = getKeyChainFromHeader(header);
+
+                    //Masterkey aus Tabelle mit eigenem PrivateKey entschlüsseln
+                    headerKeyChain = decryptKeyChain(headerKeyChain, password);
+                    String masterkey = headerKeyChain.masterKey;
+
+                    if (masterkey != null)
+                    {
+                        //Header als Byte-Array speichern
+                        headerByte = stringToByteArray(header);
+
+                        //Header im Stream weglesen (wird nicht entschlüsselt)
+                        fin2.Position = headerByte.Length;
+
+                        //Outputstream anlegen
+                        FileStream fout = new FileStream(SIT_Ressources.DecryptedPath + filename, FileMode.OpenOrCreate, FileAccess.Write);
+                        fout.SetLength(0);
+
+                        //Helfervariablen für Lesen und Schreiben.
+                        byte[] bin = new byte[10000];   //Puffer fürs Entschlüsseln.
+                        long rdlen = 0;                 //Anzahl der geschriebenen Bytes
+                        long totlen = fin2.Length - headerByte.Length;       //Länge der Datei ohne Header
+                        int len;                        //Anzahl der Bytes die auf einmal geschrieben werden sollen.
+
+                        TripleDES tDes = new TripleDESCryptoServiceProvider();
+                        byte[] masterkeyBit = stringToByteArray(masterkey);
+                        //Masterkey überschreiben
+                        masterkey = "";
+                        CryptoStream decStream = new CryptoStream(fout, tDes.CreateDecryptor(masterkeyBit, tDesIV), CryptoStreamMode.Write);
+
+                        try
+                        {
+                            //Aus dem Input-File lesen, entschlüsseln und in Output-File schreiben
+                            while (rdlen < totlen)
+                            {
+                                len = fin2.Read(bin, 0, 10000);
+                                decStream.Write(bin, 0, len);
+                                rdlen = rdlen + len;
+                            }
+
+                        }
+                        catch
+                        {
+                            //Alles Schließen
+                            decStream.Close();
+                            fout.Close();
+                            fin2.Close();
+                            throw new Exception("Fehler beim Entschlüsseln: Falsches Passwort?");
+                        }
+                        //Alles Schließen
+                        decStream.Close();
+                        fout.Close();
+                        fin2.Close();
+
+                        //Pfad der entschlüsselten Datei zurückgeben
+                        return SIT_Ressources.DecryptedPath + filename;
+
+                    }
+                    else {
+                        //Offenen Stream schließen
+                        fin2.Close();
+                        throw new Exception("Die Datei kann nicht entschlüsselt werden: Falsches Passwort?");
+                    }
+                }
+                else
+                {
+                    //Offenen Stream schließen
+                    fin2.Close();
+                    throw new Exception("Die Datei kann nicht entschlüsselt werden, da sie nicht im gültigen Format vorliegt: Header fehlerhaft.");
+                }
+            }
+            else
+            {
+                //Header konnte nicht gelesen werden
+                throw new Exception("Die Datei kann nicht entschlüsselt werden, da sie nicht im gültigen Format vorliegt: Data-Tag nicht gefunden.");
+            }
+        
         }
     }
 

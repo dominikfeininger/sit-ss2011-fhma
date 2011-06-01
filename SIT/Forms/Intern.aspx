@@ -32,6 +32,10 @@
         {
             font-size: xx-small;
         }
+        .style8
+        {
+            width: 348px;
+        }
     </style>
 </head>
 <body alink="#ffffff" bgcolor="#00496c" text="#ffffff" vlink="#66ccff" 
